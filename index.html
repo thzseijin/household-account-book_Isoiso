@@ -345,8 +345,19 @@ const firebaseConfig = {
             document.getElementById('baseNameInput').value = state.baseName;
             document.getElementById('nameInputA').value = state.nameA;
             document.getElementById('nameInputB').value = state.nameB;
-            document.getElementById('memoInput').value = state.memo || '';
-
+            document.getElementById('memoInput').value = state.memo;
+            // Firestoreからデータを読み込む。
+            db.collection('householdData').doc('shared')
+            .get() 
+            .then((doc) => {
+                if (doc.exists) {
+                    console.log('Firestore接続OK',doc.data());
+                } else {
+                    console.log('Firestore接続OK:まだ保存データなし');
+                }
+            }) .catch((error) => { 
+                console.error('Firestore接続エラー', error);
+            }
             // イベントバインド
             document.getElementById('targetMonth').addEventListener('change', (e) => {
                 state.targetMonth = e.target.value;
