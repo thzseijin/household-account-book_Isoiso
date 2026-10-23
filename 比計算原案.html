@@ -1,1 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月次比率計算ツール</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        /* 印刷・PDF出力用スタイル (@media print) */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .page-container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card-shadow {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            .print-break-inside-avoid {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col min-h-screen">
+
+    <!-- ヘッダー（印刷時非表示） -->
+    <header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600 rounded-lg shadow-sm">
+                    <i data-lucide="calculator" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight">比率計算・按分ツール</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">毎月の数値比率算出 ＆ 基準値の自動割り振り</p>
+                </div>
+            </div>
+            
+            <!-- 印刷ボタン -->
+            <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition-all active:scale-95">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>レポート印刷/PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 page-container">
+
+        <!-- 印刷用ヘッダー（画面表示時は非表示） -->
+        <div class="hidden print-only mb-6 border-b-2 border-slate-900 pb-3">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">月次比率・按分計算レポート</h1>
+                    <p class="text-xs text-slate-600 mt-1">出力日時: <span id="printDate"></span></p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 border border-slate-300 rounded" id="printMonthLabel"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブナビゲーション（印刷時非表示） -->
+        <div class="no-print mb-6 border-b border-slate-200">
+            <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                <button id="tabBtn1" onclick="switchTab(1)" class="tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors">
+                    <i data-lucide="percent" class="w-4 h-4"></i>
+                    <span>月次データ入力・比率計算</span>
+                </button>
+                <button id="tabBtn2" onclick="switchTab(2)" class="tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>定義済み数値（基幹数値）設定</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- タブ1: 月次データ入力 ＆ 比率計算 -->
+        <div id="tabContent1" class="tab-content space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- 左側：月次数値入力フォーム (no-print) -->
+                <div class="no-print md:col-span-5 bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600"></i> 今月の数値入力
+                        </h2>
+                        <input type="month" id="targetMonth" class="text-xs bg-slate-50 border border-slate-300 rounded px-2 py-1 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+
+                    <!-- 数値A -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" id="labelDisplayA">数値 A</label>
+                        <div class="relative">
+                            <input type="number" id="inputA" value="600" min="0" step="any" oninput="handleInput()" placeholder="0"
+                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- 数値B -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" id="labelDisplayB">数値 B</label>
+                        <div class="relative">
+                            <input type="number" id="inputB" value="400" min="0" step="any" oninput="handleInput()" placeholder="0"
+                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- リセット・保存クリア -->
+                    <div class="pt-2 flex justify-between items-center text-xs">
+                        <span id="saveStatus" class="text-slate-400">自動保存されました</span>
+                        <button onclick="resetMonthlyInputs()" class="text-rose-500 hover:text-rose-700 underline font-medium">クリア</button>
+                    </div>
+                </div>
+
+                <!-- 右側：リアルタイム比率結果表示カード -->
+                <div class="md:col-span-7 bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-5 card-shadow print-break-inside-avoid">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i> 計算された比率・割合
+                        </h2>
+                        <span class="text-xs text-slate-400 font-mono" id="ratioFormula">A : B</span>
+                    </div>
+
+                    <!-- 比率概要 (例 6:4 や割合) -->
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <span class="text-xs font-semibold text-indigo-700 block truncate" id="cardLabelA">数値 A</span>
+                            <span class="text-2xl font-bold text-indigo-900 font-mono mt-1 block" id="percentA">60.0%</span>
+                            <span class="text-xs text-indigo-600/80 font-mono mt-0.5 block" id="valA">600</span>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                            <span class="text-xs font-semibold text-emerald-700 block truncate" id="cardLabelB">数値 B</span>
+                            <span class="text-2xl font-bold text-emerald-900 font-mono mt-1 block" id="percentB">40.0%</span>
+                            <span class="text-xs text-emerald-600/80 font-mono mt-0.5 block" id="valB">400</span>
+                        </div>
+                    </div>
+
+                    <!-- 視覚化プログレスバー -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-500 mb-1.5 font-medium">
+                            <span>構成比グラフ</span>
+                            <span id="totalSumLabel">合計: 1,000</span>
+                        </div>
+                        <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+                            <div id="barA" class="bg-indigo-600 h-full transition-all duration-300" style="width: 60%"></div>
+                            <div id="barB" class="bg-emerald-500 h-full transition-all duration-300" style="width: 40%"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mt-1 font-mono">
+                            <span id="barTextA">A: 60.0%</span>
+                            <span id="barTextB">B: 40.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- 簡易比率（整数比） -->
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
+                        <span class="font-medium text-slate-600">整数比（最も簡単な比）</span>
+                        <span class="font-bold font-mono text-slate-800 text-sm" id="simplifiedRatio">3 : 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下段：按分（割り振り）結果エリア -->
+            <div class="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 card-shadow print-break-inside-avoid">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-3 gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="split" class="w-5 h-5 text-indigo-600"></i> 基準数値の自動按分（割り振り）結果
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">定義された基準数値の上記比率による分配計算結果です。</p>
+                    </div>
+                    <div class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1.5">
+                        <span class="text-slate-500">対象基準値 (<span id="baseValueName">共通経費</span>):</span>
+                        <span class="font-bold font-mono text-slate-900 text-sm" id="baseValueDisplay">¥1,000,000</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <!-- 分配値 A -->
+                    <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/40 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-2 h-full bg-indigo-600"></div>
+                        <div class="text-xs font-bold text-indigo-800 mb-1 flex justify-between items-center">
+                            <span id="allocLabelA">分配値 A</span>
+                            <span class="text-[11px] font-normal text-indigo-600" id="allocPercentA">(60.0%)</span>
+                        </div>
+                        <div class="text-2xl font-extrabold text-slate-900 font-mono mt-2" id="allocValueA">¥600,000</div>
+                        <div class="text-[11px] text-slate-500 mt-1 font-mono" id="allocCalcDetailA">¥1,000,000 × 60.0%</div>
+                    </div>
+
+                    <!-- 分配値 B -->
+                    <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-2 h-full bg-emerald-500"></div>
+                        <div class="text-xs font-bold text-emerald-800 mb-1 flex justify-between items-center">
+                            <span id="allocLabelB">分配値 B</span>
+                            <span class="text-[11px] font-normal text-emerald-600" id="allocPercentB">(40.0%)</span>
+                        </div>
+                        <div class="text-2xl font-extrabold text-slate-900 font-mono mt-2" id="allocValueB">¥400,000</div>
+                        <div class="text-[11px] text-slate-500 mt-1 font-mono" id="allocCalcDetailB">¥1,000,000 × 40.0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 備考欄（印刷対応） -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2 card-shadow print-break-inside-avoid">
+                <label class="block text-xs font-bold text-slate-700">備考 / メモ</label>
+                <textarea id="memoInput" rows="2" oninput="handleMemoInput()" placeholder="今月の特記事項やメモを記載できます..." 
+                    class="no-print w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                <div id="printMemo" class="hidden print-only text-xs text-slate-800 whitespace-pre-wrap min-h-[40px]"></div>
+            </div>
+
+        </div>
+
+        <!-- タブ2: 定義済み数値（基幹数値）設定 -->
+        <div id="tabContent2" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 max-w-2xl mx-auto">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i> 基幹数値 ＆ ラベル設定
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">按分計算の基準となる金額や、項目の名称をカスタマイズできます。</p>
+                </div>
+
+                <!-- 基準数値設定 -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値（按分元の総額）</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-sm">¥</span>
+                            <input type="number" id="baseValueInput" value="1000000" min="0" step="any" oninput="handleConfigChange()"
+                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg pl-8 pr-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">例：共通コスト、全体予算、本社経費など</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値の項目名</label>
+                        <input type="text" id="baseNameInput" value="共通経費" oninput="handleConfigChange()"
+                            class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+
+                    <hr class="border-slate-100">
+
+                    <!-- 項目A・Bのカスタムラベル -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-indigo-700 mb-1">項目 A の名称</label>
+                            <input type="text" id="nameInputA" value="部門 A" oninput="handleConfigChange()"
+                                class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-700 mb-1">項目 B の名称</label>
+                            <input type="text" id="nameInputB" value="部門 B" oninput="handleConfigChange()"
+                                class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end">
+                    <button onclick="switchTab(1)" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5">
+                        <span>設定完了して計算画面へ</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- フッター（印刷時非表示） -->
+    <footer class="no-print bg-white border-t border-slate-200 mt-auto py-4">
+        <div class="max-w-5xl mx-auto px-4 text-center text-xs text-slate-400">
+            月次比率計算・按分ツール &copy; ローカル保存対応
+        </div>
+    </footer>
+
+    <!-- JavaScript ロジック -->
+    <script>
+        // デフォルト設定
+        const STORAGE_KEY = 'monthly_ratio_app_data';
+        
+        let state = {
+            inputA: 600,
+            inputB: 400,
+            baseValue: 1000000,
+            baseName: '共通経費',
+            nameA: '部門 A',
+            nameB: '部門 B',
+            memo: '',
+            targetMonth: ''
+        };
+
+        // 初期化処理
+        document.addEventListener('DOMContentLoaded', () => {
+            // アイコン読み込み
+            lucide.createIcons();
+
+            // 今月設定
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            state.targetMonth = `${yyyy}-${mm}`;
+
+            // LocalStorageから復元
+            loadState();
+
+            // UI反映
+            document.getElementById('targetMonth').value = state.targetMonth;
+            document.getElementById('inputA').value = state.inputA;
+            document.getElementById('inputB').value = state.inputB;
+            document.getElementById('baseValueInput').value = state.baseValue;
+            document.getElementById('baseNameInput').value = state.baseName;
+            document.getElementById('nameInputA').value = state.nameA;
+            document.getElementById('nameInputB').value = state.nameB;
+            document.getElementById('memoInput').value = state.memo || '';
+
+            // イベントバインド
+            document.getElementById('targetMonth').addEventListener('change', (e) => {
+                state.targetMonth = e.target.value;
+                saveState();
+                updatePrintHeader();
+            });
+
+            updatePrintHeader();
+            render();
+        });
+
+        // タブ切り替え
+        function switchTab(tabNum) {
+            const tabBtn1 = document.getElementById('tabBtn1');
+            const tabBtn2 = document.getElementById('tabBtn2');
+            const content1 = document.getElementById('tabContent1');
+            const content2 = document.getElementById('tabContent2');
+
+            if (tabNum === 1) {
+                content1.classList.remove('hidden');
+                content2.classList.add('hidden');
+
+                tabBtn1.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors";
+                tabBtn2.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors";
+            } else {
+                content1.classList.add('hidden');
+                content2.classList.remove('hidden');
+
+                tabBtn2.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors";
+                tabBtn1.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors";
+            }
+        }
+
+        // 入力変更ハンドラ (月次データ)
+        function handleInput() {
+            state.inputA = parseFloat(document.getElementById('inputA').value) || 0;
+            state.inputB = parseFloat(document.getElementById('inputB').value) || 0;
+            saveState();
+            render();
+        }
+
+        // 設定変更ハンドラ (定義値)
+        function handleConfigChange() {
+            state.baseValue = parseFloat(document.getElementById('baseValueInput').value) || 0;
+            state.baseName = document.getElementById('baseNameInput').value || '共通経費';
+            state.nameA = document.getElementById('nameInputA').value || '項目 A';
+            state.nameB = document.getElementById('nameInputB').value || '項目 B';
+            saveState();
+            render();
+        }
+
+        // メモ入力ハンドラ
+        function handleMemoInput() {
+            state.memo = document.getElementById('memoInput').value;
+            document.getElementById('printMemo').innerText = state.memo;
+            saveState();
+        }
+
+        // 月次入力のリセット
+        function resetMonthlyInputs() {
+            document.getElementById('inputA').value = 0;
+            document.getElementById('inputB').value = 0;
+            handleInput();
+        }
+
+        // 計算 & UI描画
+        function render() {
+            const a = Math.max(0, state.inputA);
+            const b = Math.max(0, state.inputB);
+            const sum = a + b;
+
+            // 割合（%）計算
+            const pctA = sum > 0 ? (a / sum) * 100 : 0;
+            const pctB = sum > 0 ? (b / sum) * 100 : 0;
+
+            // ラベルの更新
+            document.getElementById('labelDisplayA').innerText = state.nameA;
+            document.getElementById('labelDisplayB').innerText = state.nameB;
+            document.getElementById('cardLabelA').innerText = state.nameA;
+            document.getElementById('cardLabelB').innerText = state.nameB;
+            document.getElementById('allocLabelA').innerText = `分配値: ${state.nameA}`;
+            document.getElementById('allocLabelB').innerText = `分配値: ${state.nameB}`;
+            document.getElementById('baseValueName').innerText = state.baseName;
+
+            // 数値・割合表示
+            document.getElementById('valA').innerText = formatNumber(a);
+            document.getElementById('valB').innerText = formatNumber(b);
+            document.getElementById('percentA').innerText = `${pctA.toFixed(1)}%`;
+            document.getElementById('percentB').innerText = `${pctB.toFixed(1)}%`;
+
+            // プログレスバー
+            document.getElementById('barA').style.width = `${pctA}%`;
+            document.getElementById('barB').style.width = `${pctB}%`;
+            document.getElementById('barTextA').innerText = `${state.nameA}: ${pctA.toFixed(1)}%`;
+            document.getElementById('barTextB').innerText = `${state.nameB}: ${pctB.toFixed(1)}%`;
+            document.getElementById('totalSumLabel').innerText = `合計: ${formatNumber(sum)}`;
+
+            // 最簡整数比
+            document.getElementById('simplifiedRatio').innerText = getSimplifiedRatio(a, b);
+
+            // 按分計算 (基準数値 * 各割合)
+            const base = Math.max(0, state.baseValue);
+            const allocA = (base * pctA) / 100;
+            const allocB = (base * pctB) / 100;
+
+            document.getElementById('baseValueDisplay').innerText = formatCurrency(base);
+            document.getElementById('allocValueA').innerText = formatCurrency(allocA);
+            document.getElementById('allocValueB').innerText = formatCurrency(allocB);
+
+            document.getElementById('allocPercentA').innerText = `(${pctA.toFixed(1)}%)`;
+            document.getElementById('allocPercentB').innerText = `(${pctB.toFixed(1)}%)`;
+
+            document.getElementById('allocCalcDetailA').innerText = `${formatCurrency(base)} × ${pctA.toFixed(1)}%`;
+            document.getElementById('allocCalcDetailB').innerText = `${formatCurrency(base)} × ${pctB.toFixed(1)}%`;
+
+            // 印刷用メモ
+            document.getElementById('printMemo').innerText = state.memo || '';
+        }
+
+        // 印刷用ヘッダー情報更新
+        function updatePrintHeader() {
+            const now = new Date();
+            document.getElementById('printDate').innerText = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            if (state.targetMonth) {
+                const [y, m] = state.targetMonth.split('-');
+                document.getElementById('printMonthLabel').innerText = `${y}年 ${parseInt(m, 10)}月度`;
+            } else {
+                document.getElementById('printMonthLabel').innerText = '月度未指定';
+            }
+        }
+
+        // ユーティリティ: ユークリッドの互除法で最大公約数を求める
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        // ユーティリティ: 整数比（A:B）を算出
+        function getSimplifiedRatio(valA, valB) {
+            if (valA === 0 && valB === 0) return '0 : 0';
+            if (valA === 0) return '0 : 1';
+            if (valB === 0) return '1 : 0';
+
+            // 小数を整数に丸める（倍率調整）
+            const precision = 100;
+            let intA = Math.round(valA * precision);
+            let intB = Math.round(valB * precision);
+
+            const divisor = gcd(intA, intB);
+            intA = Math.round(intA / divisor);
+            intB = Math.round(intB / divisor);
+
+            return `${intA} : ${intB}`;
+        }
+
+        // ユーティリティ: 数値フォーマット（カンマ区切り）
+        function formatNumber(num) {
+            return Number(num.toFixed(2)).toLocaleString('ja-JP');
+        }
+
+        // ユーティリティ: 通貨フォーマット（円）
+        function formatCurrency(num) {
+            return '¥' + Math.round(num).toLocaleString('ja-JP');
+        }
+
+        // LocalStorage 保存
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                const statusEl = document.getElementById('saveStatus');
+                statusEl.innerText = '保存されました';
+                statusEl.classList.remove('text-slate-400');
+                statusEl.classList.add('text-emerald-600');
+                setTimeout(() => {
+                    statusEl.innerText = '自動保存されました';
+                    statusEl.classList.remove('text-emerald-600');
+                    statusEl.classList.add('text-slate-400');
+                }, 1500);
+            } catch (e) {
+                console.error('LocalStorage save error:', e);
+            }
+        }
+
+        // LocalStorage 復元
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                console.error('LocalStorage load error:', e);
+            }
+        }
+    </script>
+</body>
+</html>
