@@ -357,7 +357,7 @@ const firebaseConfig = {
                 }
             }) .catch((error) => { 
                 console.error('Firestore接続エラー', error);
-            }
+            });
             // イベントバインド
             document.getElementById('targetMonth').addEventListener('change', (e) => {
                 state.targetMonth = e.target.value;
