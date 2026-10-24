@@ -595,6 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // LocalStorage 保存
         function saveState() {
+            alert('saveStateが実行されました');
 try {
 // スマホ内に保存
 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
