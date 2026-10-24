@@ -621,10 +621,10 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 state: state,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-
             console.log('Firebase保存成功');
-        } catch (e) {
-            console.error('Firebase保存エラー:', e);
+} catch (e) {
+console.error('Firebase保存エラー:', e);
+alert('Firebase保存エラー: ' + e.code + '\n' + e.message);
         }
     }, 700);
 
