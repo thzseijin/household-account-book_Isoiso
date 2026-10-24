@@ -615,8 +615,11 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     firestoreSaveTimer = setTimeout(async () => {
         try {
             const user = firebase.auth().currentUser;
-            if (!user) return;
 
+if (!user) {
+alert('Firebaseにログインしていないため、保存できません。');
+return;
+}
             await db.collection('householdData').doc('shared').set({
                 state: state,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
