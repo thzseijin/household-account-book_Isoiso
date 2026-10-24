@@ -625,6 +625,7 @@ return;
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             console.log('Firebase保存成功');
+alert('Firebaseへの保存に成功しました！');
 } catch (e) {
 console.error('Firebase保存エラー:', e);
 alert('Firebase保存エラー: ' + e.code + '\n' + e.message);
