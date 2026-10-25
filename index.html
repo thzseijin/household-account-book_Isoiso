@@ -414,14 +414,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('loginError');
 
     // ログイン状態を確認
-   auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    loginScreen.classList.add('hidden');
-    await loadSharedState();
-  } else {
-    loginScreen.classList.remove('hidden');
-  }
+  
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        loginScreen.classList.add('hidden');
+
+        await loadSharedState();
+
+        // 共有データ読み込み後に権限を適用
+        updateUserPermissions(user);
+    } else {
+        loginScreen.classList.remove('hidden');
+        document.getElementById('currentUserName').textContent =
+            '未ログイン';
+    }
 });
+
 
     // ログインボタンの処理
     loginForm.addEventListener('submit', async (event) => {
