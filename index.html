@@ -584,106 +584,61 @@ document.addEventListener('DOMContentLoaded', () => {
             return '¥' + Math.round(num).toLocaleString('ja-JP');
         }
 
-        // LocalStorage 保存
         
-　　　　
-function saveState() {
-    try {
-        // まず、この端末には保存する
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-        const statusEl = document.getElementById('saveStatus');
-
-        // Firebaseへの保存前に状態を表示
-        statusEl.innerText = 'Firebase保存待ち...';
-        statusEl.classList.remove('text-slate-400', 'text-emerald-600');
-        statusEl.classList.add('text-amber-600');
-
-        // 連続入力時は、最後の入力から700ms待つ
-        clearTimeout(firestoreSaveTimer);
-
-        firestoreSaveTimer = setTimeout(async () => {
+        // LocalStorage・Firebaseへの保存
+        function saveState() {
+            // 端末内への保存
             try {
-                const user = firebase.auth().currentUser;
-
-                // ログイン状態を確認
-                if (!user) {
-                    statusEl.innerText = '共有保存失敗：ログイン状態なし';
-                    console.error('Firebase保存中止：currentUserがnullです');
-                    return;
-                }
-
-                // 実際にログインしているUIDを確認
-                console.log('ログイン中のUID:', user.uid);
-
-                await db.collection('householdData')
-                    .doc('shared')
-                    .set({
-                        state: state,
-                        updatedAt:
-                            firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-
-                statusEl.innerText = 'Firebase共有保存成功';
-                statusEl.classList.remove('text-amber-600');
-                statusEl.classList.add('text-emerald-600');
-
-                console.log('Firebase保存成功');
-
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             } catch (error) {
-                statusEl.innerText =
-                    'Firebase保存失敗: ' +
-                    (error.code || error.message || '原因不明');
-
-                console.error('Firebase保存エラー:', error);
+                console.error('端末内の保存エラー:', error);
             }
-        }, 700);
 
-    } catch (error) {
-        console.error('端末内の保存エラー:', error);
-        document.getElementById('saveStatus').innerText =
-            '端末内の保存に失敗しました';
-    }
-}
+            const statusEl = document.getElementById('saveStatus');
 
+            statusEl.innerText = 'Firebase保存待ち...';
+            statusEl.classList.remove(
+                'text-slate-400',
+                'text-emerald-600',
+                'text-rose-600'
+            );
+            statusEl.classList.add('text-amber-600');
 
-// スマホ内に保存
-localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            // 入力が続いている間は保存を待ち、最後の入力後に保存する
+            clearTimeout(firestoreSaveTimer);
 
-    const statusEl = document.getElementById('saveStatus');
-    statusEl.innerText = '保存されました';
-    statusEl.classList.remove('text-slate-400');
-    statusEl.classList.add('text-emerald-600');
+            firestoreSaveTimer = setTimeout(async () => {
+                try {
+                    const user = firebase.auth().currentUser;
 
-    setTimeout(() => {
-        statusEl.innerText = '自動保存されました';
-        statusEl.classList.remove('text-emerald-600');
-        statusEl.classList.add('text-slate-400');
-    }, 1500);
+                    if (!user) {
+                        statusEl.innerText = '未ログイン：共有保存できません';
+                        console.error('Firebase保存中止：ログインしていません');
+                        return;
+                    }
 
-    // Firebaseへの保存（連続入力時は少し待ってから保存）
-    clearTimeout(firestoreSaveTimer);
-    firestoreSaveTimer = setTimeout(async () => {
-        try {
-            const user = firebase.auth().currentUser;
+                    await db.collection('householdData')
+                        .doc('shared')
+                        .set({
+                            state: state,
+                            updatedAt:
+                                firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
 
-if (!user) {
-return;
-}
-            await db.collection('householdData').doc('shared').set({
-                state: state,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            console.log('Firebase保存成功');
-} catch (e) {
-console.error('Firebase保存エラー:', e);
-        }
-    }, 700);
+                    statusEl.innerText = '共有保存成功';
+                    statusEl.classList.remove('text-amber-600');
+                    statusEl.classList.add('text-emerald-600');
 
-} catch (e) {
-    console.error('保存エラー:', e);
-}
+                    console.log('Firebase共有保存成功 UID:', user.uid);
 
+                } catch (error) {
+                    statusEl.innerText = '共有保存失敗';
+                    statusEl.classList.remove('text-amber-600');
+                    statusEl.classList.add('text-rose-600');
+
+                    console.error('Firebase保存エラー:', error);
+                }
+            }, 700);
         }
 
         // LocalStorage 復元
