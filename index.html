@@ -948,20 +948,32 @@ function updateExpenseItem(index, field, value) {
     updateExpenseTotal();
 }
 
+
 function updateExpenseTotal() {
     const total = (state.expenseItems || []).reduce(
         (sum, item) => sum + (Number(item.amount) || 0), 0
     );
 
+    // 共通経費の合計を基準値に反映
     state.baseValue = total;
 
-    document.getElementById('baseValueInput').value = total;
+    // 画面上の基準値を更新
+    const baseInput = document.getElementById('baseValueInput');
+    if (baseInput) {
+        baseInput.value = total;
+    }
 
-    updateExpenseTotalDisplay();
+    // 現在の月のデータにも反映
     saveCurrentMonthData();
-    saveState();
+
+    // 1ページ目の表示を更新
     render();
+    updateExpenseTotalDisplay();
+
+    // 端末内とFirebaseに保存
+    saveState();
 }
+
 
 function addExpenseItem() {
     if (isMonthlyLocked()) return;
