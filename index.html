@@ -846,22 +846,101 @@ function toggleExpenseDetails() {
         .classList.toggle('hidden');
 }
 
-function initializeExpenseItems() {
-    const data = state.monthlyData?.[state.targetMonth];
 
-    if (data && Array.isArray(data.expenseItems)) {
-        state.expenseItems = data.expenseItems.map(item => ({
-            name: item.name || '',
-            amount: Number(item.amount) || 0
-        }));
-    } else {
-        state.expenseItems = [{
-            name: '共通経費',
-            amount: Number(state.baseValue) || 0
-        }];
+function initializeExpenseItems() {
+    const month = state.targetMonth;
+
+    if (!state.monthlyData) {
+        state.monthlyData = {};
+    }
+
+    // 標準で常に表示する項目
+    const standardNames = [
+        '家賃',
+        '電気代',
+        'ガス代',
+        '水道代',
+        '食費',
+        '日用品',
+        '共有貯金'
+    ];
+
+    // 前月を取得
+    let previousItems = [];
+
+    if (month) {
+        const [year, monthNumber] = month.split('-').map(Number);
+        const previousDate = new Date(year, monthNumber - 2, 1);
+        const previousMonth =
+            `${previousDate.getFullYear()}-${String(
+                previousDate.getMonth() + 1
+            ).padStart(2, '0')}`;
+
+        const previousData = state.monthlyData[previousMonth];
+
+        if (Array.isArray(previousData?.expenseItems)) {
+            previousItems = previousData.expenseItems;
+        }
+    }
+
+    // 今月の保存済み項目
+    const currentData = state.monthlyData[month];
+    const currentItems = Array.isArray(currentData?.expenseItems)
+        ? currentData.expenseItems
+        : (Array.isArray(state.expenseItems) ? state.expenseItems : []);
+
+    // 今月の金額があれば優先し、なければ前月の金額を引き継ぐ
+    const items = standardNames.map(name => {
+        const current = currentItems.find(item => item.name === name);
+        const previous = previousItems.find(item => item.name === name);
+
+        return {
+            name,
+            amount: Number(
+                current ? current.amount :
+                previous ? previous.amount : 0
+            ) || 0
+        };
+    });
+
+    // 標準項目以外の、今月登録済みの独自項目も残す
+    currentItems.forEach(item => {
+        if (!standardNames.includes(item.name)) {
+            items.push({
+                name: item.name || '',
+                amount: Number(item.amount) || 0
+            });
+        }
+    });
+
+    state.expenseItems = items;
+
+    // 明細の合計を基準値に反映
+    state.baseValue = items.reduce(
+        (sum, item) => sum + item.amount,
+        0
+    );
+
+    // 今月のデータとして保存
+    if (month) {
+        state.monthlyData[month] = {
+            ...(currentData || {}),
+            inputA: currentData?.inputA ?? state.inputA ?? 600,
+            inputB: currentData?.inputB ?? state.inputB ?? 400,
+            baseValue: state.baseValue,
+            memo: currentData?.memo ?? state.memo ?? '',
+            expenseItems: items.map(item => ({ ...item }))
+        };
     }
 
     renderExpenseItems();
+
+    const baseInput = document.getElementById('baseValueInput');
+    if (baseInput) {
+        baseInput.value = state.baseValue;
+    }
+
+    render();
 }
 
 function renderExpenseItems() {
