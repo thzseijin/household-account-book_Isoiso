@@ -721,24 +721,31 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 
         // 設定変更ハンドラ (定義値)
         
+
 function handleConfigChange() {
-    // 現在選択している月の共通経費を更新
-    state.baseValue =
-        parseFloat(document.getElementById('baseValueInput').value) || 0;
-
-    state.baseName =
-        document.getElementById('baseNameInput').value || '共通経費';
-
-    state.nameA =
-        document.getElementById('nameInputA').value || '項目 A';
-
-    state.nameB =
-        document.getElementById('nameInputB').value || '項目 B';
-
-    // 月ごとのデータを用意
-    if (!state.monthlyData) {
-        state.monthlyData = {};
+    if (isMonthlyLocked()) {
+        document.getElementById('baseValueInput').value =
+            state.baseValue;
+        return;
     }
+
+    const inputValue =
+        document.getElementById('baseValueInput').value;
+
+    state.baseValue =
+        inputValue === '' ? 0 : Math.max(0, Number(inputValue) || 0);
+
+    state.baseName = '共通経費';
+    state.nameA = 'なみちゃん';
+    state.nameB = 'しんや';
+
+    // 選択中の月だけに保存
+    saveCurrentMonthData();
+
+    saveState();
+    render();
+}
+
 
     const month = state.targetMonth;
 
