@@ -542,10 +542,12 @@ function updateMonthlyLock() {
 }
         // 月次入力のリセット
         function resetMonthlyInputs() {
-            document.getElementById('inputA').value = 0;
-            document.getElementById('inputB').value = 0;
-            handleInput();
-        }
+    if (isMonthlyLocked()) return;
+
+    document.getElementById('inputA').value = 0;
+    document.getElementById('inputB').value = 0;
+    handleInput();
+}
 
         // 計算 & UI描画
         function render() {
