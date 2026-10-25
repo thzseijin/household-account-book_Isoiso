@@ -393,7 +393,8 @@ console.error('ログインエラー:', error);
             nameA: '部門 A',
             nameB: '部門 B',
             memo: '',
-            targetMonth: ''
+            targetMonth: '',
+            monthlyData:{}
         };
 
         // 初期化処理
@@ -421,11 +422,24 @@ console.error('ログインエラー:', error);
             document.getElementById('memoInput').value = state.memo;
             
             // イベントバインド
-            document.getElementById('targetMonth').addEventListener('change', (e) => {
-                state.targetMonth = e.target.value;
-                saveState();
-                updatePrintHeader();
-            });
+           
+document.getElementById('targetMonth').addEventListener('change', (e) => {
+    // 変更前の月のデータを保存
+    saveCurrentMonthData();
+
+    // 選択した月に切り替える
+    state.targetMonth = e.target.value;
+
+    // 選択した月のデータを読み込む
+    loadMonthData(state.targetMonth);
+
+    // Firebase・端末に保存
+    saveState();
+
+    // 印刷用の月表示を更新
+    updatePrintHeader();
+});
+
 
             updatePrintHeader();
             render();
@@ -454,12 +468,16 @@ console.error('ログインエラー:', error);
         }
 
         // 入力変更ハンドラ (月次データ)
-        function handleInput() {
-            state.inputA = parseFloat(document.getElementById('inputA').value) || 0;
-            state.inputB = parseFloat(document.getElementById('inputB').value) || 0;
-            saveState();
-            render();
-        }
+        
+function handleInput() {
+    state.inputA = parseFloat(document.getElementById('inputA').value) || 0;
+    state.inputB = parseFloat(document.getElementById('inputB').value) || 0;
+
+    saveCurrentMonthData();
+    saveState();
+    render();
+}
+
 
         // 設定変更ハンドラ (定義値)
         function handleConfigChange() {
@@ -472,11 +490,14 @@ console.error('ログインエラー:', error);
         }
 
         // メモ入力ハンドラ
-        function handleMemoInput() {
-            state.memo = document.getElementById('memoInput').value;
-            document.getElementById('printMemo').innerText = state.memo;
-            saveState();
-        }
+       
+function handleMemoInput() {
+    state.memo = document.getElementById('memoInput').value;
+    document.getElementById('printMemo').innerText = state.memo;
+
+    saveCurrentMonthData();
+    saveState();
+}
 
         // 月次入力のリセット
         function resetMonthlyInputs() {
@@ -655,6 +676,42 @@ console.error('ログインエラー:', error);
             }
         }
 
+        // 現在の月のデータを月別保存領域に記録
+function saveCurrentMonthData() {
+    const month = state.targetMonth;
+    if (!month) return;
+
+    if (!state.monthlyData) {
+        state.monthlyData = {};
+    }
+
+    state.monthlyData[month] = {
+        inputA: state.inputA,
+        inputB: state.inputB,
+        memo: state.memo || ''
+    };
+}
+
+// 指定した月のデータを読み込む
+function loadMonthData(month) {
+    if (!state.monthlyData) {
+        state.monthlyData = {};
+    }
+
+    const data = state.monthlyData[month];
+
+    // まだ入力していない月は初期値にする
+    state.inputA = data ? data.inputA : 600;
+    state.inputB = data ? data.inputB : 400;
+    state.memo = data ? (data.memo || '') : '';
+
+    // 画面に反映
+    document.getElementById('inputA').value = state.inputA;
+    document.getElementById('inputB').value = state.inputB;
+    document.getElementById('memoInput').value = state.memo;
+
+    render();
+}
         
         // Firebaseから共有データを読み込む
         async function loadSharedState() {
