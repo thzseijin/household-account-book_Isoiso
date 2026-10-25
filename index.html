@@ -739,26 +739,21 @@ function handleConfigChange() {
     state.nameA = 'なみちゃん';
     state.nameB = 'しんや';
 
-    // 選択中の月だけに保存
     saveCurrentMonthData();
-
     saveState();
     render();
 }
 
-        // メモ入力ハンドラ
-       
+// メモ入力ハンドラ
 function handleMemoInput() {
+    if (isMonthlyLocked()) return;
 
-     if (isMonthlyLocked()) return;
-    
     state.memo = document.getElementById('memoInput').value;
     document.getElementById('printMemo').innerText = state.memo;
 
     saveCurrentMonthData();
     saveState();
 }
-
         // 月別データの編集ロック
 function updateMonthlyLock() {
     const month = state.targetMonth;
