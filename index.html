@@ -248,17 +248,58 @@
                 <span>レポート印刷/PDF</span>
             </button>
             
- 　　　　　　<!-- ログイン中のユーザー表示 -->
-　　　　　　<div id="userBadge"
-    　　　　 class="flex items-center gap-2 text-xs text-white ml-3">
-   　　　　 <i data-lucide="user-round" class="w-5 h-5"></i>
-   　　　　 <span id="currentUserName">確認中...</span>
-   　　　　 <button type="button"
+ 　　　　　　
+<!-- ログイン中のユーザー表示 -->
+<div id="userBadge"
+     class="flex items-center gap-2 ml-2 sm:ml-3">
+
+    <!-- プロフィールアイコン -->
+    <div id="userAvatar"
+         class="w-10 h-10 sm:w-12 sm:h-12 rounded-full
+                bg-slate-800 border border-slate-600
+                flex items-center justify-center
+                flex-shrink-0 shadow-inner">
+
+        <!-- なみちゃん用：波 -->
+        <i id="userWave"
+           data-lucide="waves"
+           class="hidden w-7 h-7 sm:w-8 sm:h-8 text-sky-300">
+        </i>
+
+        <!-- しんや用：月と星 -->
+        <i id="userMoon"
+           data-lucide="moon-star"
+           class="hidden w-7 h-7 sm:w-8 sm:h-8 text-amber-200">
+        </i>
+
+        <!-- その他のユーザー用 -->
+        <i id="userDefaultIcon"
+           data-lucide="user-round"
+           class="w-6 h-6 text-slate-300">
+        </i>
+    </div>
+
+    <!-- ユーザー名 -->
+    <div class="flex flex-col gap-0.5 min-w-0">
+        <span class="text-[10px] sm:text-xs text-slate-400">
+            ログイン中
+        </span>
+        <span id="currentUserName"
+              class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+            確認中...
+        </span>
+    </div>
+
+    <!-- ログアウト -->
+    <button type="button"
             onclick="auth.signOut()"
-            class="underline text-slate-300 hover:text-white">
+            class="ml-1 sm:ml-2 text-[11px] sm:text-xs
+                   underline text-slate-300 hover:text-white
+                   whitespace-nowrap">
         ログアウト
     </button>
 </div>
+
         </div>
     </header>
 
