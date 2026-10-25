@@ -693,17 +693,31 @@ function saveCurrentMonthData() {
 }
 
 // 指定した月のデータを読み込む
+
 function loadMonthData(month) {
     if (!state.monthlyData) {
         state.monthlyData = {};
     }
 
-    const data = state.monthlyData[month];
+    // 指定した月の保存データを確認
+    let data = state.monthlyData[month];
 
-    // まだ入力していない月は初期値にする
-    state.inputA = data ? data.inputA : 600;
-    state.inputB = data ? data.inputB : 400;
-    state.memo = data ? (data.memo || '') : '';
+    // 月別データがまだない場合は、現在の数値を引き継ぐ
+    // 初期値で過去のデータを上書きしない
+    if (!data) {
+        data = {
+            inputA: state.inputA,
+            inputB: state.inputB,
+            memo: state.memo || ''
+        };
+
+        state.monthlyData[month] = data;
+    }
+
+    // 保存データを状態に反映
+    state.inputA = data.inputA ?? 600;
+    state.inputB = data.inputB ?? 400;
+    state.memo = data.memo ?? '';
 
     // 画面に反映
     document.getElementById('inputA').value = state.inputA;
@@ -712,6 +726,7 @@ function loadMonthData(month) {
 
     render();
 }
+
         
         // Firebaseから共有データを読み込む
         async function loadSharedState() {
@@ -721,13 +736,32 @@ function loadMonthData(month) {
                     .doc('shared')
                     .get();
 
-                if (doc.exists && doc.data().state) {
-                    // Firebaseのデータをアプリの状態に反映
-                    state = {
-                        ...state,
-                        ...doc.data().state
-                    };
-                }
+                
+if (doc.exists && doc.data().state) {
+    // Firebaseの既存データを保持しながら読み込む
+    const savedState = doc.data().state;
+
+    state = {
+        ...state,
+        ...savedState,
+        monthlyData: {
+            ...(state.monthlyData || {}),
+            ...(savedState.monthlyData || {})
+        }
+    };
+
+    // 過去の形式で保存されたデータも月別データへ引き継ぐ
+    const month = state.targetMonth;
+
+    if (month && !state.monthlyData[month]) {
+        state.monthlyData[month] = {
+            inputA: state.inputA,
+            inputB: state.inputB,
+            memo: state.memo || ''
+        };
+    }
+}
+
 
                 // 画面の入力欄に反映
                 document.getElementById('targetMonth').value =
@@ -748,7 +782,10 @@ function loadMonthData(month) {
 
                 updatePrintHeader();
                 render();
-
+　　　　　　　　　await db.collection('householdData').doc('shared').set({
+    state: state,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+}, { merge: true });
                 console.log('共有データの読み込み完了');
 
             } catch (error) {
