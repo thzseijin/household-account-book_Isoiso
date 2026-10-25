@@ -679,10 +679,8 @@ function updateUserAvatar(user) {
                 locked || !canEditB;
 
             document.getElementById('memoInput').disabled = locked;
-            document.getElementById('baseValueInput').disabled = isLocked;
-            document.getElementById('clearMonthlyButton').disabled =
-                locked || (!canEditA && !canEditB);
-
+            document.getElementById('baseValueInput').disabled = locked;
+            
             const statusEl = document.getElementById('saveStatus');
 
             if (locked) {
@@ -1236,6 +1234,7 @@ function updateMonthlyLock() {
 
         // 現在の月のデータを月別保存領域に記録
 
+
 function saveCurrentMonthData() {
     const month = state.targetMonth;
     if (!month) return;
@@ -1244,21 +1243,17 @@ function saveCurrentMonthData() {
         state.monthlyData = {};
     }
 
-    // 現在の月のデータだけを保存
+    // 現在の月のデータを保存
     state.monthlyData[month] = {
         ...(state.monthlyData[month] || {}),
         inputA: state.inputA,
         inputB: state.inputB,
         baseValue: state.baseValue,
         memo: state.memo || '',
-        state.monthlyData[month] = {
-    ...(state.monthlyData[month] || {}),
-    inputA: state.inputA,
-    inputB: state.inputB,
-    baseValue: state.baseValue,
-    memo: state.memo || '',
-    expenseItems: state.expenseItems || []
-};
+        expenseItems: (state.expenseItems || []).map(item => ({
+            name: item.name || '',
+            amount: Number(item.amount) || 0
+        }))
     };
 }
 
