@@ -505,6 +505,7 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
     // 選択した月のデータを読み込む
     loadMonthData(state.targetMonth);
     updateMonthlyLock();
+    updateUserPermissions(auth.currentUser);
 
     // 端末内・Firebaseに保存
     saveState();
