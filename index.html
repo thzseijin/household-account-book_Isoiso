@@ -779,126 +779,82 @@ function loadMonthData(month) {
         
         // Firebaseから共有データを読み込む
         
-async function loadSharedState() {
-    try {
-        const doc = await db
-            .collection('householdData')
-            .doc('shared')
-            .get();
+        // Firebaseから共有データを読み込む
+        async function loadSharedState() {
+            try {
+                const doc = await db
+                    .collection('householdData')
+                    .doc('shared')
+                    .get();
 
-        if (doc.exists && doc.data().state) {
-            const savedState = doc.data().state;
+                if (doc.exists && doc.data().state) {
+                    const savedState = doc.data().state;
 
-            // Firebaseの保存データを読み込む
-            state = {
-                ...state,
-                ...savedState,
-                monthlyData: {
-                    ...(state.monthlyData || {}),
-                    ...(savedState.monthlyData || {})
+                    state = {
+                        ...state,
+                        ...savedState,
+                        monthlyData: {
+                            ...(state.monthlyData || {}),
+                            ...(savedState.monthlyData || {})
+                        }
+                    };
                 }
-            };
 
-            // 月が未設定なら今月を設定
-            if (!state.targetMonth) {
-                const now = new Date();
-                state.targetMonth =
-                    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-            }
+                // 月が未設定なら今月を設定
+                if (!state.targetMonth) {
+                    const now = new Date();
+                    state.targetMonth =
+                        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                }
 
-            // 選択中の月のデータを画面に反映
-            const month = state.targetMonth;
+                // 選択中の月のデータを確認
+                const month = state.targetMonth;
 
-            if (state.monthlyData[month]) {
-                const data = state.monthlyData[month];
-                state.inputA = data.inputA ?? 600;
-                state.inputB = data.inputB ?? 400;
-                state.memo = data.memo ?? '';
-            } else {
-                // 月別データがない場合は、初期値で作成
-                state.monthlyData[month] = {
-                    inputA: 600,
-                    inputB: 400,
-                    memo: ''
-                };
+                if (!state.monthlyData) {
+                    state.monthlyData = {};
+                }
 
-                state.inputA = 600;
-                state.inputB = 400;
-                state.memo = '';
-            }
-        }
+                if (state.monthlyData[month]) {
+                    const data = state.monthlyData[month];
+                    state.inputA = data.inputA ?? 600;
+                    state.inputB = data.inputB ?? 400;
+                    state.memo = data.memo ?? '';
+                } else {
+                    state.monthlyData[month] = {
+                        inputA: 600,
+                        inputB: 400,
+                        memo: ''
+                    };
 
-        // 画面に反映
-        document.getElementById('targetMonth').value = state.targetMonth;
-        document.getElementById('inputA').value = state.inputA;
-        document.getElementById('inputB').value = state.inputB;
-        document.getElementById('baseValueInput').value = state.baseValue;
-        document.getElementById('baseNameInput').value = state.baseName;
-        document.getElementById('nameInputA').value = state.nameA;
-        document.getElementById('nameInputB').value = state.nameB;
-        document.getElementById('memoInput').value = state.memo || '';
-        document.getElementById('printMemo').innerText = state.memo || '';
+                    state.inputA = 600;
+                    state.inputB = 400;
+                    state.memo = '';
+                }
 
-        // 端末内にも保存
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-        updatePrintHeader();
-        updateMonthlyLock();
-        render();
-
-        console.log('共有データの読み込み完了');
-
-    } catch (error) {
-        console.error('共有データの読み込みに失敗しました:', error);
-    }
-}
-
-
-    // 過去の形式で保存されたデータも月別データへ引き継ぐ
-    const month = state.targetMonth;
-
-    if (month && !state.monthlyData[month]) {
-        state.monthlyData[month] = {
-            inputA: state.inputA,
-            inputB: state.inputB,
-            memo: state.memo || ''
-        };
-    }
-}
-
-
-                // 画面の入力欄に反映
-                document.getElementById('targetMonth').value =
-                    state.targetMonth || '';
-
+                // 画面にデータを反映
+                document.getElementById('targetMonth').value = state.targetMonth;
                 document.getElementById('inputA').value = state.inputA;
                 document.getElementById('inputB').value = state.inputB;
-                document.getElementById('baseValueInput').value =
-                    state.baseValue;
-                document.getElementById('baseNameInput').value =
-                    state.baseName;
+                document.getElementById('baseValueInput').value = state.baseValue;
+                document.getElementById('baseNameInput').value = state.baseName;
                 document.getElementById('nameInputA').value = state.nameA;
                 document.getElementById('nameInputB').value = state.nameB;
                 document.getElementById('memoInput').value = state.memo || '';
+                document.getElementById('printMemo').innerText = state.memo || '';
 
-                // この端末にも保存
+                // 端末内にも保存
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
                 updatePrintHeader();
                 updateMonthlyLock();
                 render();
-                
-　　　　　　　　　await db.collection('householdData').doc('shared').set({
-    state: state,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-}, { merge: true });
+
                 console.log('共有データの読み込み完了');
 
             } catch (error) {
                 console.error('共有データの読み込みに失敗しました:', error);
             }
         }
-
     </script>
 </body>
 </html>
