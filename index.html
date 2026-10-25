@@ -192,6 +192,46 @@
                 overflow-wrap: anywhere;
             }
         }
+        
+/* スマホ表示：ヘッダーを縦並びにする */
+@media screen and (max-width: 640px) {
+    header {
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 16px 12px !important;
+    }
+
+    header > div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    header h1 {
+        font-size: 1.25rem !important;
+        line-height: 1.5 !important;
+        overflow-wrap: anywhere;
+    }
+
+    header button,
+    header input,
+    header select {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    header .flex {
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    header > div > * {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
 
     </style>
 </head>
