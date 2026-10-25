@@ -423,8 +423,9 @@ console.error('ログインエラー:', error);
             
             // イベントバインド
            
+
 document.getElementById('targetMonth').addEventListener('change', (e) => {
-    // 変更前の月のデータを保存
+    // 切り替え前の月のデータを記録
     saveCurrentMonthData();
 
     // 選択した月に切り替える
@@ -433,12 +434,14 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
     // 選択した月のデータを読み込む
     loadMonthData(state.targetMonth);
     updateMonthlyLock();
-    // Firebase・端末に保存
+
+    // 端末内・Firebaseに保存
     saveState();
 
-    // 印刷用の月表示を更新
+    // 印刷表示を更新
     updatePrintHeader();
 });
+
 
 
             updatePrintHeader();
