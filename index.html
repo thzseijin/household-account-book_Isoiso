@@ -720,14 +720,44 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 
 
         // 設定変更ハンドラ (定義値)
-        function handleConfigChange() {
-            state.baseValue = parseFloat(document.getElementById('baseValueInput').value) || 0;
-            state.baseName = document.getElementById('baseNameInput').value || '共通経費';
-            state.nameA = document.getElementById('nameInputA').value || '項目 A';
-            state.nameB = document.getElementById('nameInputB').value || '項目 B';
-            saveState();
-            render();
+        
+function handleConfigChange() {
+    // 現在選択している月の共通経費を更新
+    state.baseValue =
+        parseFloat(document.getElementById('baseValueInput').value) || 0;
+
+    state.baseName =
+        document.getElementById('baseNameInput').value || '共通経費';
+
+    state.nameA =
+        document.getElementById('nameInputA').value || '項目 A';
+
+    state.nameB =
+        document.getElementById('nameInputB').value || '項目 B';
+
+    // 月ごとのデータを用意
+    if (!state.monthlyData) {
+        state.monthlyData = {};
+    }
+
+    const month = state.targetMonth;
+
+    if (month) {
+        if (!state.monthlyData[month]) {
+            state.monthlyData[month] = {
+                inputA: state.inputA,
+                inputB: state.inputB,
+                memo: state.memo || ''
+            };
         }
+
+        // 選択中の月だけに共通経費を保存
+        state.monthlyData[month].baseValue = state.baseValue;
+    }
+
+    saveState();
+    render();
+}
 
         // メモ入力ハンドラ
        
