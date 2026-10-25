@@ -357,6 +357,57 @@ const firebaseConfig = {
         // Firebaseログイン処理
 const auth = firebase.auth();
 
+        // アカウントごとの担当設定
+        // 下の2つは、実際に登録したメールアドレスに置き換える
+        const USER_EMAIL_A = 'namiki.gyoza@gmail.com';
+        const USER_EMAIL_B = 'kirari.384835@gmail.com';
+
+        // ログイン中の人に合わせて表示と入力権限を更新
+        function updateUserPermissions(user) {
+            const email = (user.email || '').toLowerCase();
+
+            let displayName = '未登録ユーザー';
+            let canEditA = false;
+            let canEditB = false;
+
+            if (email === USER_EMAIL_A.toLowerCase()) {
+                displayName = 'なみちゃん';
+                canEditA = true;
+            } else if (email === USER_EMAIL_B.toLowerCase()) {
+                displayName = '慎也';
+                canEditB = true;
+            }
+
+            document.getElementById('currentUserName').textContent =
+                displayName;
+
+            // 過去月の締めロックも考慮する
+            const locked = isMonthlyLocked();
+
+            document.getElementById('inputA').disabled =
+                locked || !canEditA;
+
+            document.getElementById('inputB').disabled =
+                locked || !canEditB;
+
+            document.getElementById('memoInput').disabled = locked;
+            document.getElementById('clearMonthlyButton').disabled =
+                locked || (!canEditA && !canEditB);
+
+            const statusEl = document.getElementById('saveStatus');
+
+            if (locked) {
+                statusEl.textContent =
+                    `${state.targetMonth}分：月末締め・編集不可`;
+            } else if (canEditA || canEditB) {
+                statusEl.textContent = canEditA
+                    ? '彼女：数値Aを編集できます'
+                    : '自分：数値Bを編集できます';
+            } else {
+                statusEl.textContent = '担当アカウントではありません';
+            }
+        }
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginScreen = document.getElementById('loginScreen');
     const loginForm = document.getElementById('loginForm');
