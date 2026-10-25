@@ -40,6 +40,159 @@
                 break-inside: avoid;
             }
         }
+        
+        /* スマホ表示の改善 */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        input,
+        textarea,
+        button,
+        select {
+            max-width: 100%;
+            font-size: 16px;
+        }
+
+        @media screen and (max-width: 640px) {
+            /* メイン画面の余白 */
+            main.page-container {
+                padding: 12px;
+            }
+
+            /* ヘッダー */
+            header > div {
+                gap: 8px;
+                padding: 10px 12px;
+            }
+
+            header h1 {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+
+            header button {
+                flex-shrink: 0;
+                padding: 9px 10px;
+                font-size: 11px;
+            }
+
+            /* タブを画面幅に収める */
+            nav[aria-label="Tabs"] {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+
+            nav[aria-label="Tabs"] button {
+                min-width: 0;
+                padding: 10px 6px;
+                justify-content: center;
+                gap: 5px;
+                font-size: 11px;
+                line-height: 1.5;
+                text-align: center;
+                white-space: normal;
+            }
+
+            nav[aria-label="Tabs"] button span {
+                overflow-wrap: anywhere;
+            }
+
+            /* カードの余白を少し小さく */
+            #tabContent1 > div,
+            #tabContent2 > div {
+                min-width: 0;
+            }
+
+            #tabContent1 .rounded-xl,
+            #tabContent2 .rounded-xl {
+                min-width: 0;
+            }
+
+            /* 見出しと月選択欄 */
+            #tabContent1 > div > .no-print > div:first-child {
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            #targetMonth {
+                width: 145px;
+                min-width: 0;
+                padding: 7px 4px;
+                font-size: 14px;
+            }
+
+            /* 比率カード */
+            #percentA,
+            #percentB {
+                font-size: 22px;
+                overflow-wrap: anywhere;
+            }
+
+            #valA,
+            #valB,
+            #totalSumLabel {
+                overflow-wrap: anywhere;
+            }
+
+            /* 按分結果の金額がはみ出さないように */
+            #allocValueA,
+            #allocValueB {
+                font-size: clamp(17px, 5vw, 24px);
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            #allocCalcDetailA,
+            #allocCalcDetailB {
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            /* 基準値表示 */
+            #baseValueDisplay {
+                overflow-wrap: anywhere;
+            }
+
+            /* ボタンや入力欄を押しやすく */
+            input,
+            textarea,
+            select {
+                min-height: 42px;
+            }
+
+            button {
+                min-height: 40px;
+                touch-action: manipulation;
+            }
+
+            /* メモ */
+            #memoInput {
+                width: 100%;
+                min-height: 80px;
+                line-height: 1.6;
+            }
+
+            /* タブ内の横幅超過を防ぐ */
+            .grid {
+                min-width: 0;
+            }
+
+            /* 保存状態の文字が狭い画面で詰まらないように */
+            #saveStatus {
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+        }
+
     </style>
 </head>
 <body class="h-full text-slate-800 flex flex-col min-h-screen">
