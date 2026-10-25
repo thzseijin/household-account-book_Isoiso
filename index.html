@@ -586,8 +586,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // LocalStorage 保存
         
-　　　　function saveState() {
-　　　　try {
+　　　　
+function saveState() {
+    try {
+        // まず、この端末には保存する
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+        const statusEl = document.getElementById('saveStatus');
+
+        // Firebaseへの保存前に状態を表示
+        statusEl.innerText = 'Firebase保存待ち...';
+        statusEl.classList.remove('text-slate-400', 'text-emerald-600');
+        statusEl.classList.add('text-amber-600');
+
+        // 連続入力時は、最後の入力から700ms待つ
+        clearTimeout(firestoreSaveTimer);
+
+        firestoreSaveTimer = setTimeout(async () => {
+            try {
+                const user = firebase.auth().currentUser;
+
+                // ログイン状態を確認
+                if (!user) {
+                    statusEl.innerText = '共有保存失敗：ログイン状態なし';
+                    console.error('Firebase保存中止：currentUserがnullです');
+                    return;
+                }
+
+                // 実際にログインしているUIDを確認
+                console.log('ログイン中のUID:', user.uid);
+
+                await db.collection('householdData')
+                    .doc('shared')
+                    .set({
+                        state: state,
+                        updatedAt:
+                            firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                statusEl.innerText = 'Firebase共有保存成功';
+                statusEl.classList.remove('text-amber-600');
+                statusEl.classList.add('text-emerald-600');
+
+                console.log('Firebase保存成功');
+
+            } catch (error) {
+                statusEl.innerText =
+                    'Firebase保存失敗: ' +
+                    (error.code || error.message || '原因不明');
+
+                console.error('Firebase保存エラー:', error);
+            }
+        }, 700);
+
+    } catch (error) {
+        console.error('端末内の保存エラー:', error);
+        document.getElementById('saveStatus').innerText =
+            '端末内の保存に失敗しました';
+    }
+}
+
 
 // スマホ内に保存
 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
