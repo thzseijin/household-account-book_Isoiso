@@ -988,6 +988,7 @@ function updateMonthlyLock() {
         }
 
         // 現在の月のデータを月別保存領域に記録
+
 function saveCurrentMonthData() {
     const month = state.targetMonth;
     if (!month) return;
@@ -996,12 +997,16 @@ function saveCurrentMonthData() {
         state.monthlyData = {};
     }
 
+    // 現在の月のデータだけを保存
     state.monthlyData[month] = {
+        ...(state.monthlyData[month] || {}),
         inputA: state.inputA,
         inputB: state.inputB,
+        baseValue: state.baseValue,
         memo: state.memo || ''
     };
 }
+
 
 // 指定した月のデータを読み込む
 
