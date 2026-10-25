@@ -429,9 +429,63 @@
                     </div>
                     <div class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1.5">
                         <span class="text-slate-500">対象基準値 (<span id="baseValueName">共通経費</span>):</span>
-                        <span class="font-bold font-mono text-slate-900 text-sm" id="baseValueDisplay">¥1,000,000</span>
+                        <button type="button"
+                            id="baseValueDisplay"
+                            onclick="toggleExpenseDetails()"
+                            class="font-bold font-mono text-indigo-700 text-sm
+                            underline decoration-dotted cursor-pointer">
+                            ¥1,000,000
+                        </button>
                     </div>
                 </div>
+
+                
+<!-- 共通経費の明細 -->
+<div id="expenseDetails"
+     class="hidden border border-indigo-200 rounded-xl p-4 bg-slate-50 space-y-3">
+
+    <div class="flex items-center justify-between gap-2">
+        <h4 class="font-bold text-sm text-slate-800">
+            共通経費の明細
+        </h4>
+        <button type="button"
+                onclick="toggleExpenseDetails()"
+                class="text-xs text-slate-500 underline">
+            閉じる
+        </button>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="bg-slate-200 text-slate-700">
+                    <th class="p-2 text-left">項目名</th>
+                    <th class="p-2 text-right">金額（円）</th>
+                    <th class="p-2 text-center">削除</th>
+                </tr>
+            </thead>
+            <tbody id="expenseItemsBody"></tbody>
+        </table>
+    </div>
+
+    <button type="button"
+            onclick="addExpenseItem()"
+            class="w-full border border-indigo-300 text-indigo-700
+                   bg-white hover:bg-indigo-50 rounded-lg py-2
+                   text-sm font-semibold">
+        ＋ 項目を追加
+    </button>
+
+    <div class="flex justify-between items-center border-t border-slate-200 pt-3">
+        <span class="text-sm font-semibold text-slate-600">
+            明細合計
+        </span>
+        <span id="expenseTotal"
+              class="text-lg font-bold text-indigo-700">
+            ¥0
+        </span>
+    </div>
+</div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <!-- 分配値 A -->
@@ -792,6 +846,144 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 }
 
 
+function toggleExpenseDetails() {
+    document.getElementById('expenseDetails')
+        .classList.toggle('hidden');
+}
+
+function initializeExpenseItems() {
+    const month = state.targetMonth;
+
+    if (!state.expenseItems) {
+        state.expenseItems = [];
+    }
+
+    if (month && state.monthlyData) {
+        const data = state.monthlyData[month];
+
+        if (data && Array.isArray(data.expenseItems)) {
+            state.expenseItems = data.expenseItems;
+        }
+    }
+
+    // 既存の基準数値がある場合、最初の明細として引き継ぐ
+    if (state.expenseItems.length === 0) {
+        state.expenseItems = [{
+            name: '共通経費（既存金額）',
+            amount: Number(state.baseValue) || 0
+        }];
+    }
+
+    renderExpenseItems();
+}
+
+function renderExpenseItems() {
+    const tbody = document.getElementById('expenseItemsBody');
+    tbody.replaceChildren();
+
+    state.expenseItems.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-200';
+
+        const nameCell = document.createElement('td');
+        nameCell.className = 'p-1';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = item.name || '';
+        nameInput.placeholder = '項目名';
+        nameInput.className =
+            'w-full min-w-24 border rounded px-2 py-2 bg-white';
+        nameInput.addEventListener('input', () => {
+            updateExpenseItem(index, 'name', nameInput.value);
+        });
+        nameCell.appendChild(nameInput);
+
+        const amountCell = document.createElement('td');
+        amountCell.className = 'p-1';
+
+        const amountInput = document.createElement('input');
+        amountInput.type = 'number';
+        amountInput.min = '0';
+        amountInput.step = '1';
+        amountInput.value = item.amount ?? 0;
+        amountInput.className =
+            'w-28 max-w-full border rounded px-2 py-2 text-right bg-white';
+        amountInput.addEventListener('input', () => {
+            updateExpenseItem(index, 'amount', amountInput.value);
+        });
+        amountCell.appendChild(amountInput);
+
+        const deleteCell = document.createElement('td');
+        deleteCell.className = 'p-1 text-center';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = '×';
+        deleteButton.className =
+            'text-rose-600 font-bold px-3 py-2';
+        deleteButton.addEventListener('click', () => {
+            removeExpenseItem(index);
+        });
+        deleteCell.appendChild(deleteButton);
+
+        tr.append(nameCell, amountCell, deleteCell);
+        tbody.appendChild(tr);
+    });
+
+    const total = state.expenseItems.reduce(
+        (sum, item) => sum + (Number(item.amount) || 0), 0
+    );
+
+    document.getElementById('expenseTotal').textContent =
+        formatCurrency(total);
+}
+
+function updateExpenseItem(index, field, value) {
+    if (!state.expenseItems[index]) return;
+
+    if (field === 'name') {
+        state.expenseItems[index].name = value;
+    } else if (field === 'amount') {
+        state.expenseItems[index].amount =
+            value === '' ? 0 : Math.max(0, Number(value) || 0);
+    }
+
+    updateExpenseTotal();
+}
+
+function updateExpenseTotal() {
+    const total = state.expenseItems.reduce(
+        (sum, item) => sum + (Number(item.amount) || 0), 0
+    );
+
+    state.baseValue = total;
+
+    // 合計金額を既存の入力欄・計算結果に反映
+    document.getElementById('baseValueInput').value = total;
+
+    saveCurrentMonthData();
+    saveState();
+    render();
+    renderExpenseItems();
+}
+
+function addExpenseItem() {
+    state.expenseItems.push({
+        name: '',
+        amount: 0
+    });
+
+    renderExpenseItems();
+    updateExpenseTotal();
+}
+
+function removeExpenseItem(index) {
+    state.expenseItems.splice(index, 1);
+    renderExpenseItems();
+    updateExpenseTotal();
+}
+
         // 設定変更ハンドラ (定義値)
         
 
@@ -1058,7 +1250,15 @@ function saveCurrentMonthData() {
         inputA: state.inputA,
         inputB: state.inputB,
         baseValue: state.baseValue,
-        memo: state.memo || ''
+        memo: state.memo || '',
+        state.monthlyData[month] = {
+    ...(state.monthlyData[month] || {}),
+    inputA: state.inputA,
+    inputB: state.inputB,
+    baseValue: state.baseValue,
+    memo: state.memo || '',
+    expenseItems: state.expenseItems || []
+};
     };
 }
 
@@ -1091,6 +1291,14 @@ function loadMonthData(month) {
     state.inputA = data.inputA ?? 600;
     state.inputB = data.inputB ?? 400;
     state.baseValue = data.baseValue ?? 1000000;
+    state.expenseItems = Array.isArray(data.expenseItems)
+    ? data.expenseItems
+    : [{
+        name: '共通経費（既存金額）',
+        amount: data.baseValue ?? 1000000
+    }];
+
+renderExpenseItems();
     state.memo = data.memo ?? '';
 
     // 画面に表示
@@ -1180,7 +1388,9 @@ if (state.monthlyData[month]) {
 
                 updatePrintHeader();
                 updateMonthlyLock();
+                initializeExpenseItems();
                 render();
+                initializeExpenseItems();
 
                 console.log('共有データの読み込み完了');
 
