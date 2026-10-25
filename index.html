@@ -374,8 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
             await auth.signInWithEmailAndPassword(email, password);
         } catch (error) {
             loginError.textContent =
-                'ログインできませんでした。メールアドレスとパスワードを確認してください。';
-            loginError.classList.remove('hidden');
+    'エラーコード: ' + (error.code || error.message);
+loginError.classList.remove('hidden');
+console.error('ログインエラー:', error);
             console.error('ログインエラー:', error);
         }
     });
