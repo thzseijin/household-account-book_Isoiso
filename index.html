@@ -594,9 +594,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // LocalStorage 保存
-        function saveState() {
-            alert('saveStateが実行されました');
-try {
+        
+　　　　function saveState() {
+　　　　try {
+
 // スマホ内に保存
 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
@@ -618,7 +619,6 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const user = firebase.auth().currentUser;
 
 if (!user) {
-alert('Firebaseにログインしていないため、保存できません。');
 return;
 }
             await db.collection('householdData').doc('shared').set({
@@ -626,10 +626,8 @@ return;
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             console.log('Firebase保存成功');
-alert('Firebaseへの保存に成功しました！');
 } catch (e) {
 console.error('Firebase保存エラー:', e);
-alert('Firebase保存エラー: ' + e.code + '\n' + e.message);
         }
     }, 700);
 
