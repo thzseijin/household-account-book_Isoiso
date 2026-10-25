@@ -432,7 +432,7 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 
     // 選択した月のデータを読み込む
     loadMonthData(state.targetMonth);
-
+    updateMonthlyLock();
     // Firebase・端末に保存
     saveState();
 
@@ -442,6 +442,7 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 
 
             updatePrintHeader();
+            updateMonthlyLock();
             render();
         });
 
@@ -824,7 +825,9 @@ if (doc.exists && doc.data().state) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
                 updatePrintHeader();
+                updateMonthlyLock();
                 render();
+                
 　　　　　　　　　await db.collection('householdData').doc('shared').set({
     state: state,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
