@@ -94,6 +94,18 @@
                 <i data-lucide="printer" class="w-4 h-4"></i>
                 <span>レポート印刷/PDF</span>
             </button>
+            
+<!-- ログイン中のユーザー表示 -->
+<div id="userBadge"
+     class="flex items-center gap-2 text-xs text-white ml-3">
+    <i data-lucide="user-round" class="w-5 h-5"></i>
+    <span id="currentUserName">確認中...</span>
+    <button type="button"
+            onclick="auth.signOut()"
+            class="underline text-slate-300 hover:text-white">
+        ログアウト
+    </button>
+</div>
         </div>
     </header>
 
