@@ -553,6 +553,7 @@ const auth = firebase.auth();
                 locked || !canEditB;
 
             document.getElementById('memoInput').disabled = locked;
+            document.getElementById('baseValueInput').disabled = isLocked;
             document.getElementById('clearMonthlyButton').disabled =
                 locked || (!canEditA && !canEditB);
 
