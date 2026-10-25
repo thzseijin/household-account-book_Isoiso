@@ -289,21 +289,23 @@
 
                 <!-- 基準数値設定 -->
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値（按分元の総額）</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-sm">¥</span>
-                            <input type="number" id="baseValueInput" value="1000000" min="0" step="any" oninput="handleConfigChange()"
-                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg pl-8 pr-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
-                        </div>
+                   <div>
+                       <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値の項目名</label>
+                       <div id="baseNameInput"
+                           class="w-full text-sm bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-slate-600">
+                           共通経費
+                       </div>
+                   </div>
                         <p class="text-[11px] text-slate-400 mt-1">例：共通コスト、全体予算、本社経費など</p>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値の項目名</label>
-                        <input type="text" id="baseNameInput" value="共通経費" oninput="handleConfigChange()"
-                            class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
+                       <label class="block text-xs font-semibold text-slate-700 mb-1">基準数値の項目名</label>
+                       <div id="baseNameInput"
+                           class="w-full text-sm bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-slate-600">
+                           共通経費
+                       </div>
+                   </div>
 
                     <hr class="border-slate-100">
 
