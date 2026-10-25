@@ -351,13 +351,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('loginError');
 
     // ログイン状態を確認
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            loginScreen.classList.add('hidden');
-        } else {
-            loginScreen.classList.remove('hidden');
-        }
-    });
+   auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    loginScreen.classList.add('hidden');
+    await loadSharedState();
+  } else {
+    loginScreen.classList.remove('hidden');
+  }
+});
 
     // ログインボタンの処理
     loginForm.addEventListener('submit', async (event) => {
@@ -381,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
         // デフォルト設定
         const STORAGE_KEY = 'monthly_ratio_app_data';
+        let firestoreSaveTimer = null;
         
         let state = {
             inputA: 600,
@@ -416,18 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('nameInputA').value = state.nameA;
             document.getElementById('nameInputB').value = state.nameB;
             document.getElementById('memoInput').value = state.memo;
-            // Firestoreからデータを読み込む。
-            db.collection('householdData').doc('shared')
-            .get() 
-            .then((doc) => {
-                if (doc.exists) {
-                    console.log('Firestore接続OK',doc.data());
-                } else {
-                    console.log('Firestore接続OK:まだ保存データなし');
-                }
-            }) .catch((error) => { 
-                console.error('Firestore接続エラー', error);
-            });
+            
             // イベントバインド
             document.getElementById('targetMonth').addEventListener('change', (e) => {
                 state.targetMonth = e.target.value;
@@ -649,6 +640,51 @@ console.error('Firebase保存エラー:', e);
                 console.error('LocalStorage load error:', e);
             }
         }
+
+        
+        // Firebaseから共有データを読み込む
+        async function loadSharedState() {
+            try {
+                const doc = await db
+                    .collection('householdData')
+                    .doc('shared')
+                    .get();
+
+                if (doc.exists && doc.data().state) {
+                    // Firebaseのデータをアプリの状態に反映
+                    state = {
+                        ...state,
+                        ...doc.data().state
+                    };
+                }
+
+                // 画面の入力欄に反映
+                document.getElementById('targetMonth').value =
+                    state.targetMonth || '';
+
+                document.getElementById('inputA').value = state.inputA;
+                document.getElementById('inputB').value = state.inputB;
+                document.getElementById('baseValueInput').value =
+                    state.baseValue;
+                document.getElementById('baseNameInput').value =
+                    state.baseName;
+                document.getElementById('nameInputA').value = state.nameA;
+                document.getElementById('nameInputB').value = state.nameB;
+                document.getElementById('memoInput').value = state.memo || '';
+
+                // この端末にも保存
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+                updatePrintHeader();
+                render();
+
+                console.log('共有データの読み込み完了');
+
+            } catch (error) {
+                console.error('共有データの読み込みに失敗しました:', error);
+            }
+        }
+
     </script>
 </body>
 </html>
