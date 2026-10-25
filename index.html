@@ -469,7 +469,9 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
 
         // 入力変更ハンドラ (月次データ)
         
-function handleInput() {
+　　　　function handleInput() {
+    if (isMonthlyLocked()) return;
+
     state.inputA = parseFloat(document.getElementById('inputA').value) || 0;
     state.inputB = parseFloat(document.getElementById('inputB').value) || 0;
 
@@ -492,6 +494,9 @@ function handleInput() {
         // メモ入力ハンドラ
        
 function handleMemoInput() {
+
+     if (isMonthlyLocked()) return;
+    
     state.memo = document.getElementById('memoInput').value;
     document.getElementById('printMemo').innerText = state.memo;
 
@@ -499,6 +504,42 @@ function handleMemoInput() {
     saveState();
 }
 
+        // 月別データの編集ロック
+function updateMonthlyLock() {
+    const month = state.targetMonth;
+    const now = new Date();
+    const currentMonth =
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // 選択中の月が今月より前ならロック
+    const isLocked = !!month && month < currentMonth;
+
+    document.getElementById('inputA').disabled = isLocked;
+    document.getElementById('inputB').disabled = isLocked;
+    document.getElementById('memoInput').disabled = isLocked;
+    document.getElementById('clearMonthlyButton').disabled = isLocked;
+
+    // ロック状態を表示
+    const statusEl = document.getElementById('saveStatus');
+
+    if (isLocked) {
+        statusEl.innerText = `${month}分：月末締め・編集不可`;
+        statusEl.className = 'text-rose-600';
+    } else {
+        statusEl.innerText = '編集可能';
+        statusEl.className = 'text-emerald-600';
+    }
+}
+        function isMonthlyLocked() {
+    const month = state.targetMonth;
+    if (!month) return false;
+
+    const now = new Date();
+    const currentMonth =
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    return month < currentMonth;
+}
         // 月次入力のリセット
         function resetMonthlyInputs() {
             document.getElementById('inputA').value = 0;
