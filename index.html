@@ -562,6 +562,39 @@ const auth = firebase.auth();
         const USER_EMAIL_A = 'namiki.gyoza@gmail.com';
         const USER_EMAIL_B = 'kirari.384835@gmail.com';
 
+        
+function updateUserAvatar(user) {
+    const wave = document.getElementById('userWave');
+    const moon = document.getElementById('userMoon');
+    const defaultIcon = document.getElementById('userDefaultIcon');
+
+    // いったん全部隠す
+    wave.classList.add('hidden');
+    moon.classList.add('hidden');
+    defaultIcon.classList.add('hidden');
+
+    if (!user) {
+        defaultIcon.classList.remove('hidden');
+        return;
+    }
+
+    const email = (user.email || '').toLowerCase();
+
+    if (email === USER_EMAIL_A.toLowerCase()) {
+        // なみちゃん：ざっぱーんとした波
+        wave.classList.remove('hidden');
+    } else if (email === USER_EMAIL_B.toLowerCase()) {
+        // しんや：月と星
+        moon.classList.remove('hidden');
+    } else {
+        // 登録対象外のユーザー
+        defaultIcon.classList.remove('hidden');
+    }
+
+    // アイコンを再描画
+    lucide.createIcons();
+}
+
         // ログイン中の人に合わせて表示と入力権限を更新
         function updateUserPermissions(user) {
             const email = (user.email || '').toLowerCase();
@@ -580,7 +613,8 @@ const auth = firebase.auth();
 
             document.getElementById('currentUserName').textContent =
                 displayName;
-
+            updateUserAvatar(user);
+            
             // 過去月の締めロックも考慮する
             const locked = isMonthlyLocked();
 
