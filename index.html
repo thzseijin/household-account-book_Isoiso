@@ -1352,32 +1352,73 @@ renderExpenseItems();
                 }
 
                 // 選択中の月のデータを確認
+                
+                // 選択中の月のデータを確認
                 const month = state.targetMonth;
 
                 if (!state.monthlyData) {
                     state.monthlyData = {};
                 }
 
-                
-if (state.monthlyData[month]) {
-    const data = state.monthlyData[month];
-    state.inputA = data.inputA ?? 600;
-    state.inputB = data.inputB ?? 400;
-    state.baseValue = data.baseValue ?? 1000000;
-    state.memo = data.memo ?? '';
-} else {
-    state.monthlyData[month] = {
-        inputA: 600,
-        inputB: 400,
-        baseValue: 1000000,
-        memo: ''
-    };
+                // 既存の月別データがあれば優先して読み込む
+                const data = state.monthlyData[month];
 
-    state.inputA = 600;
-    state.inputB = 400;
-    state.baseValue = 1000000;
-    state.memo = '';
-}
+                if (data) {
+                    state.inputA = data.inputA ?? state.inputA ?? 600;
+                    state.inputB = data.inputB ?? state.inputB ?? 400;
+                    state.baseValue = data.baseValue ?? state.baseValue ?? 1000000;
+                    state.memo = data.memo ?? state.memo ?? '';
+
+                    // 月別の共通経費明細を復元
+                    if (Array.isArray(data.expenseItems)) {
+                        state.expenseItems = data.expenseItems.map(item => ({
+                            name: item.name || '',
+                            amount: Number(item.amount) || 0
+                        }));
+                    } else if (Array.isArray(state.expenseItems)) {
+                        // 旧形式の保存データから復元
+                        state.expenseItems = state.expenseItems.map(item => ({
+                            name: item.name || '',
+                            amount: Number(item.amount) || 0
+                        }));
+                    } else {
+                        state.expenseItems = [{
+                            name: '共通経費',
+                            amount: Number(state.baseValue) || 0
+                        }];
+                    }
+                } else {
+                    // 月別データがない場合も、共有済みの共通経費を引き継ぐ
+                    state.expenseItems = Array.isArray(state.expenseItems)
+                        ? state.expenseItems.map(item => ({
+                            name: item.name || '',
+                            amount: Number(item.amount) || 0
+                        }))
+                        : [{
+                            name: '共通経費',
+                            amount: Number(state.baseValue) || 0
+                        }];
+
+                    state.monthlyData[month] = {
+                        inputA: state.inputA ?? 600,
+                        inputB: state.inputB ?? 400,
+                        baseValue: state.baseValue ?? 1000000,
+                        memo: state.memo || '',
+                        expenseItems: state.expenseItems.map(item => ({ ...item }))
+                    };
+                }
+
+                // 明細合計と基準金額を一致させる
+                state.baseValue = state.expenseItems.reduce(
+                    (sum, item) => sum + (Number(item.amount) || 0),
+                    0
+                );
+
+                // 月別データにも最新の明細を保存
+                state.monthlyData[month].baseValue = state.baseValue;
+                state.monthlyData[month].expenseItems =
+                    state.expenseItems.map(item => ({ ...item }));
+
 
                 // 画面にデータを反映
                 document.getElementById('targetMonth').value = state.targetMonth;
