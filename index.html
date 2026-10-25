@@ -746,26 +746,6 @@ function handleConfigChange() {
     render();
 }
 
-
-    const month = state.targetMonth;
-
-    if (month) {
-        if (!state.monthlyData[month]) {
-            state.monthlyData[month] = {
-                inputA: state.inputA,
-                inputB: state.inputB,
-                memo: state.memo || ''
-            };
-        }
-
-        // 選択中の月だけに共通経費を保存
-        state.monthlyData[month].baseValue = state.baseValue;
-    }
-
-    saveState();
-    render();
-}
-
         // メモ入力ハンドラ
        
 function handleMemoInput() {
