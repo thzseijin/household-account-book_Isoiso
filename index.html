@@ -9,19 +9,22 @@
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-/* タブ表示を独立した領域にする */
+
+/* 共通：タブ */
 .app-tabs {
     display: flex;
+    width: 100%;
     gap: 8px;
     align-items: stretch;
 }
 
 .app-tabs .tab-btn {
     display: flex;
+    flex: 1;
+    min-width: 0;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-width: 0;
     padding: 12px 16px;
     border: none;
     border-bottom: 3px solid transparent;
@@ -37,7 +40,74 @@
     border-bottom-color: #4f46e5;
 }
 
+/* PC */
+@media screen and (min-width: 641px) {
+    header > div {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .app-title {
+        flex-shrink: 0;
+    }
+
+    .app-title h1 {
+        white-space: nowrap;
+        font-size: 18px;
+    }
+}
+
+/* スマホ */
 @media screen and (max-width: 640px) {
+    header > div {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .app-title {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    .app-title h1 {
+        font-size: 18px;
+        line-height: 1.4;
+        white-space: normal;
+    }
+
+    .app-title p {
+        display: block;
+        font-size: 11px;
+    }
+
+    .app-print-btn {
+        grid-column: 1;
+        justify-self: start;
+        width: auto;
+        padding: 8px 10px;
+    }
+
+    .app-user {
+        grid-column: 2;
+        justify-self: end;
+        display: flex;
+        width: auto;
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .app-user-name span:first-child {
+        display: none;
+    }
+
+    .app-logout {
+        margin-left: 0;
+        font-size: 11px;
+    }
+
     .app-tabs {
         display: grid;
         grid-template-columns: 1fr;
@@ -67,36 +137,6 @@
     .app-tabs .tab-btn span {
         overflow-wrap: anywhere;
     }
-}
-        .app-title {
-    grid-column: 1 / -1;
-}
-
-.app-title h1 {
-    white-space: normal;
-    overflow-wrap: normal;
-    font-size: 18px;
-}
-
-.app-print-btn {
-    grid-column: 1;
-    justify-self: start;
-    padding: 8px 10px;
-}
-
-.app-user {
-    grid-column: 2;
-    justify-self: end;
-    gap: 6px;
-}
-
-.app-user-name span:first-child {
-    display: none;
-}
-
-.app-logout {
-    margin-left: 0;
-    font-size: 11px;
 }
 
 </style>
@@ -135,30 +175,38 @@
         </form>
     </div>
 </div>
-    <!-- ヘッダー（印刷時非表示） -->
-    <header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
-            <!-- 印刷ボタン -->
-    <button onclick="window.print()" class="app-print-btn inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition-all active:scale-95">
-        <i data-lucide="printer" class="w-4 h-4"></i>
-        <span>レポート印刷/PDF</span>
-    </button>
+   
+<!-- ヘッダー（印刷時非表示） -->
+<header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <!-- サイトタイトル -->
+        <div class="app-title">
+            <h1 class="text-lg font-bold">月次比率計算・按分ツール</h1>
+            <p class="text-xs text-slate-400">月次データ入力・比率計算</p>
+        </div>
 
-    <!-- ログイン中のユーザー表示 -->
-    <div id="userBadge" class="app-user">
-        <div id="userAvatar" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center flex-shrink-0 shadow-inner">
-            <i id="userWave" data-lucide="waves" class="hidden w-6 h-6 text-sky-300"></i>
-            <i id="userMoon" data-lucide="moon-star" class="hidden w-6 h-6 text-amber-200"></i>
-            <i id="userDefaultIcon" data-lucide="user-round" class="w-6 h-6 text-slate-300"></i>
+        <!-- 印刷ボタン -->
+        <button onclick="window.print()" class="app-print-btn inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition-all active:scale-95">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>レポート印刷/PDF</span>
+        </button>
+
+        <!-- ログイン中のユーザー表示 -->
+        <div id="userBadge" class="app-user flex items-center gap-3">
+            <div id="userAvatar" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+                <i id="userWave" data-lucide="waves" class="hidden w-6 h-6 text-sky-300"></i>
+                <i id="userMoon" data-lucide="moon-star" class="hidden w-6 h-6 text-amber-200"></i>
+                <i id="userDefaultIcon" data-lucide="user-round" class="w-6 h-6 text-slate-300"></i>
+            </div>
+            <div class="app-user-name flex flex-col">
+                <span class="text-[10px] sm:text-xs text-slate-400">ログイン中</span>
+                <span id="currentUserName" class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">確認中...</span>
+            </div>
+            <button type="button" onclick="auth.signOut()" class="app-logout text-xs underline text-slate-300 hover:text-white whitespace-nowrap">ログアウト</button>
         </div>
-        <div class="app-user-name">
-            <span class="text-[10px] sm:text-xs text-slate-400">ログイン中</span>
-            <span id="currentUserName" class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">確認中...</span>
-        </div>
-        <button type="button" onclick="auth.signOut()" class="app-logout text-xs underline text-slate-300 hover:text-white whitespace-nowrap">ログアウト</button>
     </div>
-</div>
+</header>
 
-    </header>
 
     <!-- メインコンテンツ -->
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 page-container">
