@@ -68,6 +68,37 @@
         overflow-wrap: anywhere;
     }
 }
+        .app-title {
+    grid-column: 1 / -1;
+}
+
+.app-title h1 {
+    white-space: normal;
+    overflow-wrap: normal;
+    font-size: 18px;
+}
+
+.app-print-btn {
+    grid-column: 1;
+    justify-self: start;
+    padding: 8px 10px;
+}
+
+.app-user {
+    grid-column: 2;
+    justify-self: end;
+    gap: 6px;
+}
+
+.app-user-name span:first-child {
+    display: none;
+}
+
+.app-logout {
+    margin-left: 0;
+    font-size: 11px;
+}
+
 </style>
 </head>
 <body class="h-full text-slate-800 flex flex-col min-h-screen">
@@ -106,76 +137,27 @@
 </div>
     <!-- ヘッダー（印刷時非表示） -->
     <header class="no-print bg-slate-900 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-indigo-600 rounded-lg shadow-sm">
-                    <i data-lucide="calculator" class="w-5 h-5 text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight">比率計算・按分ツール</h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">毎月の数値比率算出 ＆ 基準値の自動割り振り</p>
-                </div>
-            </div>
-            
             <!-- 印刷ボタン -->
-            <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition-all active:scale-95">
-                <i data-lucide="printer" class="w-4 h-4"></i>
-                <span>レポート印刷/PDF</span>
-            </button>
-            
- 　　　　　　
-<!-- ログイン中のユーザー表示 -->
-<div id="userBadge"
-     class="flex items-center gap-2 ml-2 sm:ml-3">
-
-    <!-- プロフィールアイコン -->
-    <div id="userAvatar"
-         class="w-10 h-10 sm:w-12 sm:h-12 rounded-full
-                bg-slate-800 border border-slate-600
-                flex items-center justify-center
-                flex-shrink-0 shadow-inner">
-
-        <!-- なみちゃん用：波 -->
-        <i id="userWave"
-           data-lucide="waves"
-           class="hidden w-7 h-7 sm:w-8 sm:h-8 text-sky-300">
-        </i>
-
-        <!-- しんや用：月と星 -->
-        <i id="userMoon"
-           data-lucide="moon-star"
-           class="hidden w-7 h-7 sm:w-8 sm:h-8 text-amber-200">
-        </i>
-
-        <!-- その他のユーザー用 -->
-        <i id="userDefaultIcon"
-           data-lucide="user-round"
-           class="w-6 h-6 text-slate-300">
-        </i>
-    </div>
-
-    <!-- ユーザー名 -->
-    <div class="flex flex-col gap-0.5 min-w-0">
-        <span class="text-[10px] sm:text-xs text-slate-400">
-            ログイン中
-        </span>
-        <span id="currentUserName"
-              class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
-            確認中...
-        </span>
-    </div>
-
-    <!-- ログアウト -->
-    <button type="button"
-            onclick="auth.signOut()"
-            class="ml-1 sm:ml-2 text-[11px] sm:text-xs
-                   underline text-slate-300 hover:text-white
-                   whitespace-nowrap">
-        ログアウト
+    <button onclick="window.print()" class="app-print-btn inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition-all active:scale-95">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span>レポート印刷/PDF</span>
     </button>
+
+    <!-- ログイン中のユーザー表示 -->
+    <div id="userBadge" class="app-user">
+        <div id="userAvatar" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <i id="userWave" data-lucide="waves" class="hidden w-6 h-6 text-sky-300"></i>
+            <i id="userMoon" data-lucide="moon-star" class="hidden w-6 h-6 text-amber-200"></i>
+            <i id="userDefaultIcon" data-lucide="user-round" class="w-6 h-6 text-slate-300"></i>
+        </div>
+        <div class="app-user-name">
+            <span class="text-[10px] sm:text-xs text-slate-400">ログイン中</span>
+            <span id="currentUserName" class="text-xs sm:text-sm font-bold text-white whitespace-nowrap">確認中...</span>
+        </div>
+        <button type="button" onclick="auth.signOut()" class="app-logout text-xs underline text-slate-300 hover:text-white whitespace-nowrap">ログアウト</button>
+    </div>
 </div>
 
-        </div>
     </header>
 
     <!-- メインコンテンツ -->
