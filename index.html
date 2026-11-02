@@ -1560,11 +1560,10 @@ renderExpenseItems();
 
                 updatePrintHeader();
                 updateMonthlyLock();
-                initializeExpenseItems();
+                renderExpenseItems();
                 render();
-                initializeExpenseItems();
 
-                console.log('共有データの読み込み完了');
+console.log('共有データの読み込み完了');
 
             } catch (error) {
                 console.error('共有データの読み込みに失敗しました:', error);
