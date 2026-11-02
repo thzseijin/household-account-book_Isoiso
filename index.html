@@ -1337,8 +1337,6 @@ function updateMonthlyLock() {
 
 
 function saveCurrentMonthData() {
-    advanceA: state.advanceA || 0,
-        advanceB: state.advanceB || 0,
     const month = state.targetMonth;
     if (!month) return;
 
@@ -1352,6 +1350,8 @@ function saveCurrentMonthData() {
         inputB: state.inputB,
         baseValue: state.baseValue,
         memo: state.memo || '',
+        advanceA: state.advanceA || 0,
+        advanceB: state.advanceB || 0,
         expenseItems: (state.expenseItems || []).map(item => ({
             name: item.name || '',
             amount: Number(item.amount) || 0
