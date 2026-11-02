@@ -614,6 +614,12 @@ function updateUserAvatar(user) {
             document.getElementById('inputB').disabled =
                 locked || !canEditB;
 
+            document.getElementById('advanceA').disabled =
+                locked || !canEditA;
+
+            document.getElementById('advanceB').disabled =
+                locked || !canEditB;
+
             document.getElementById('memoInput').disabled = locked;
             document.getElementById('baseValueInput').disabled = locked;
             
@@ -650,10 +656,8 @@ auth.onAuthStateChanged(async (user) => {
         loginScreen.classList.remove('hidden');
         document.getElementById('currentUserName').textContent =
             '未ログイン';
-        document.getElementById('advanceA').disabled =
-            locked || !canEditA;
-        document.getElementById('advanceB').disabled =
-            locked || !canEditB;
+        document.getElementById('advanceA').disabled = true;
+        document.getElementById('advanceB').disabled = true;
     }
 });
 
