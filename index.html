@@ -1028,51 +1028,59 @@ function handleMemoInput() {
 
 function updateMonthlyLock() {
     const month = state.targetMonth;
-    const now = new Date();
+    const locked = isMonthlyLocked();
 
-    const currentMonth =
-        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-    const isLocked = !!month && month < currentMonth;
-
-    // 存在する入力欄だけロック状態を設定する
     const inputIds = [
         'inputA',
         'inputB',
         'memoInput',
+        'baseValueInput',
         'clearMonthlyButton'
     ];
 
     inputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.disabled = isLocked;
+            el.disabled = locked;
         }
     });
 
-    // 保存状態の表示
     const statusEl = document.getElementById('saveStatus');
 
     if (statusEl) {
-        if (isLocked) {
-            statusEl.innerText = `${month}分：月末締め・編集不可`;
+        if (locked) {
+            statusEl.innerText = `${month}分：編集期限切れ・編集不可`;
             statusEl.className = 'text-rose-600';
         } else {
-            statusEl.innerText = '編集可能';
+            statusEl.innerText = `${month}分：編集可能`;
             statusEl.className = 'text-emerald-600';
         }
     }
 }
-
         function isMonthlyLocked() {
     const month = state.targetMonth;
     if (!month) return false;
 
     const now = new Date();
+
+    // 今月の年月
     const currentMonth =
         `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    return month < currentMonth;
+    // 前月の年月
+    const previousDate = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1
+    );
+
+    const previousMonth =
+        `${previousDate.getFullYear()}-${String(
+            previousDate.getMonth() + 1
+        ).padStart(2, '0')}`;
+
+    // 前々月以前は編集不可
+    return month < previousMonth;
 }
         // 月次入力のリセット
         function resetMonthlyInputs() {
