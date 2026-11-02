@@ -255,6 +255,24 @@
                         <input type="month" id="targetMonth" class="text-xs bg-slate-50 border border-slate-300 rounded px-2 py-1 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
                     </div>
 
+                    <!-- 数値A -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" id="labelDisplayA">数値 A</label>
+                        <div class="relative">
+                            <input type="number" id="inputA" value="600" min="0" step="any" oninput="handleInput()" placeholder="0"
+                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- 数値B -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" id="labelDisplayB">数値 B</label>
+                        <div class="relative">
+                            <input type="number" id="inputB" value="400" min="0" step="any" oninput="handleInput()" placeholder="0"
+                                class="w-full text-right font-mono text-base bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
                     <!-- リセット・保存クリア -->
                     <!-- 保存状態の表示 -->
 <div class="pt-2 text-xs">
@@ -706,6 +724,8 @@ console.error('ログインエラー:', error);
             document.getElementById('inputB').value = state.inputB;
             document.getElementById('baseValueInput').value = state.baseValue;
             document.getElementById('baseNameInput').value = state.baseName;
+            document.getElementById('nameInputA').value = state.nameA;
+            document.getElementById('nameInputB').value = state.nameB;
             document.getElementById('memoInput').value = state.memo;
             
             // イベントバインド
@@ -1506,6 +1526,8 @@ renderExpenseItems();
                 document.getElementById('advanceA').value = state.advanceA;
                 document.getElementById('advanceB').value = state.advanceB;
                 document.getElementById('baseNameInput').value = state.baseName;
+                document.getElementById('nameInputA').value = state.nameA;
+                document.getElementById('nameInputB').value = state.nameB;
                 document.getElementById('memoInput').value = state.memo || '';
                 document.getElementById('printMemo').innerText = state.memo || '';
 
