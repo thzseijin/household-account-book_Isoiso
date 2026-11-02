@@ -1203,6 +1203,14 @@ function updateMonthlyLock() {
             const allocB = (base * pctB) / 100;
 
             document.getElementById('baseValueDisplay').innerText = formatCurrency(base);
+            
+            // 立替金額を1枚目のタブに反映
+            document.getElementById('advanceBurdenA').innerText =
+                formatCurrency(state.advanceA || 0);
+
+            document.getElementById('advanceBurdenB').innerText =
+                formatCurrency(state.advanceB || 0);
+            
             document.getElementById('allocValueA').innerText = formatCurrency(allocA);
             document.getElementById('allocValueB').innerText = formatCurrency(allocB);
 
