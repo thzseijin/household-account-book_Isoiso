@@ -371,6 +371,10 @@
                         </div>
                         <div class="text-2xl font-extrabold text-slate-900 font-mono mt-2" id="allocValueA">¥600,000</div>
                         <div class="text-[11px] text-slate-500 mt-1 font-mono" id="allocCalcDetailA">¥1,000,000 × 60.0%</div>
+                        <div id="allocAdjustDetailA"
+                             class="text-[11px] text-slate-500 mt-1 font-mono">
+                                立替加減：＋¥0、－¥0
+                        </div>
                     </div>
 
                     <!-- 分配値 B -->
@@ -382,6 +386,10 @@
                         </div>
                         <div class="text-2xl font-extrabold text-slate-900 font-mono mt-2" id="allocValueB">¥400,000</div>
                         <div class="text-[11px] text-slate-500 mt-1 font-mono" id="allocCalcDetailB">¥1,000,000 × 40.0%</div>
+                        <div id="allocAdjustDetailB"
+                             class="text-[11px] text-slate-500 mt-1 font-mono">
+                                立替加減：＋¥0、－¥0
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1197,10 +1205,26 @@ function updateMonthlyLock() {
             // 最簡整数比
             document.getElementById('simplifiedRatio').innerText = getSimplifiedRatio(a, b);
 
-            // 按分計算 (基準数値 * 各割合)
+           // 基本の按分計算
             const base = Math.max(0, state.baseValue);
-            const allocA = (base * pctA) / 100;
-            const allocB = (base * pctB) / 100;
+            const originalAllocA = (base * pctA) / 100;
+            const originalAllocB = (base * pctB) / 100;
+
+            // 立替金額の半額を計算
+            const halfAdvanceA = (Number(state.advanceA) || 0) / 2;
+            const halfAdvanceB = (Number(state.advanceB) || 0) / 2;
+
+            // なみちゃん：しんやの立替半額を加算、自分の立替半額を減算
+            const addA = halfAdvanceB;
+            const subtractA = halfAdvanceA;
+
+            // しんや：なみちゃんの立替半額を加算、自分の立替半額を減算
+            const addB = halfAdvanceA;
+            const subtractB = halfAdvanceB;
+
+            // 立替調整後の分配値
+            const allocA = originalAllocA + addA - subtractA;
+            const allocB = originalAllocB + addB - subtractB;
 
             document.getElementById('baseValueDisplay').innerText = formatCurrency(base);
             
@@ -1219,6 +1243,13 @@ function updateMonthlyLock() {
 
             document.getElementById('allocCalcDetailA').innerText = `${formatCurrency(base)} × ${pctA.toFixed(1)}%`;
             document.getElementById('allocCalcDetailB').innerText = `${formatCurrency(base)} × ${pctB.toFixed(1)}%`;
+
+            // 立替加減の表示
+            document.getElementById('allocAdjustDetailA').innerText =
+                `立替加減：＋${formatCurrency(addA)}、－${formatCurrency(subtractA)}`;
+
+            document.getElementById('allocAdjustDetailB').innerText =
+                `立替加減：＋${formatCurrency(addB)}、－${formatCurrency(subtractB)}`;
 
             // 印刷用メモ
             document.getElementById('printMemo').innerText = state.memo || '';
