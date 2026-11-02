@@ -8,230 +8,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons (CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
-        body {
-            font-family: 'Noto Sans JP', 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* 印刷・PDF出力用スタイル (@media print) */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            .print-only {
-                display: block !important;
-            }
-            body {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-            }
-            .page-container {
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .card-shadow {
-                box-shadow: none !important;
-                border: 1px solid #cbd5e1 !important;
-            }
-            .print-break-inside-avoid {
-                break-inside: avoid;
-            }
-        }
-        
-        /* スマホ表示の改善 */
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-
-        input,
-        textarea,
-        button,
-        select {
-            max-width: 100%;
-            font-size: 16px;
-        }
-
-        @media screen and (max-width: 640px) {
-            /* メイン画面の余白 */
-            main.page-container {
-                padding: 12px;
-            }
-
-            /* ヘッダー */
-            header > div {
-                gap: 8px;
-                padding: 10px 12px;
-            }
-
-            header h1 {
-                font-size: 14px;
-                line-height: 1.4;
-            }
-
-            header button {
-                flex-shrink: 0;
-                padding: 9px 10px;
-                font-size: 11px;
-            }
-
-            /* タブを画面幅に収める */
-            nav[aria-label="Tabs"] {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 4px;
-            }
-
-            nav[aria-label="Tabs"] button {
-                min-width: 0;
-                padding: 10px 6px;
-                justify-content: center;
-                gap: 5px;
-                font-size: 11px;
-                line-height: 1.5;
-                text-align: center;
-                white-space: normal;
-            }
-
-            nav[aria-label="Tabs"] button span {
-                overflow-wrap: anywhere;
-            }
-
-            /* カードの余白を少し小さく */
-            #tabContent1 > div,
-            #tabContent2 > div {
-                min-width: 0;
-            }
-
-            #tabContent1 .rounded-xl,
-            #tabContent2 .rounded-xl {
-                min-width: 0;
-            }
-
-            /* 見出しと月選択欄 */
-            #tabContent1 > div > .no-print > div:first-child {
-                gap: 8px;
-                align-items: flex-start;
-            }
-
-            #targetMonth {
-                width: 145px;
-                min-width: 0;
-                padding: 7px 4px;
-                font-size: 14px;
-            }
-
-            /* 比率カード */
-            #percentA,
-            #percentB {
-                font-size: 22px;
-                overflow-wrap: anywhere;
-            }
-
-            #valA,
-            #valB,
-            #totalSumLabel {
-                overflow-wrap: anywhere;
-            }
-
-            /* 按分結果の金額がはみ出さないように */
-            #allocValueA,
-            #allocValueB {
-                font-size: clamp(17px, 5vw, 24px);
-                overflow-wrap: anywhere;
-                word-break: break-word;
-            }
-
-            #allocCalcDetailA,
-            #allocCalcDetailB {
-                overflow-wrap: anywhere;
-                word-break: break-word;
-            }
-
-            /* 基準値表示 */
-            #baseValueDisplay {
-                overflow-wrap: anywhere;
-            }
-
-            /* ボタンや入力欄を押しやすく */
-            input,
-            textarea,
-            select {
-                min-height: 42px;
-            }
-
-            button {
-                min-height: 40px;
-                touch-action: manipulation;
-            }
-
-            /* メモ */
-            #memoInput {
-                width: 100%;
-                min-height: 80px;
-                line-height: 1.6;
-            }
-
-            /* タブ内の横幅超過を防ぐ */
-            .grid {
-                min-width: 0;
-            }
-
-            /* 保存状態の文字が狭い画面で詰まらないように */
-            #saveStatus {
-                line-height: 1.5;
-                overflow-wrap: anywhere;
-            }
-        }
-        
-/* スマホ表示：ヘッダーを縦並びにする */
-@media screen and (max-width: 640px) {
-    header {
-        height: auto !important;
-        min-height: 0 !important;
-        padding: 16px 12px !important;
-    }
-
-    header > div {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-        width: 100% !important;
-    }
-
-    header h1 {
-        font-size: 1.25rem !important;
-        line-height: 1.5 !important;
-        overflow-wrap: anywhere;
-    }
-
-    header button,
-    header input,
-    header select {
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-
-    header .flex {
-        flex-wrap: wrap;
-        min-width: 0;
-    }
-
-    header > div > * {
-        width: 100%;
-        min-width: 0;
-    }
+    
+/* タブ表示を独立した領域にする */
+.app-tabs {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
 }
 
+.app-tabs .tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.app-tabs .tab-btn.active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+}
+
+@media screen and (max-width: 640px) {
+    .app-tabs {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 8px 0;
+    }
+
+    .app-tabs .tab-btn {
+        width: 100%;
+        min-height: 48px;
+        justify-content: flex-start;
+        padding: 12px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #ffffff;
+        font-size: 13px;
+        line-height: 1.5;
+        text-align: left;
+        white-space: normal;
+    }
+
+    .app-tabs .tab-btn.active {
+        border: 1px solid #4f46e5;
+        background: #eef2ff;
+    }
+
+    .app-tabs .tab-btn span {
+        overflow-wrap: anywhere;
+    }
+}
 
     </style>
 </head>
@@ -359,19 +195,23 @@
             </div>
         </div>
 
-        <!-- タブナビゲーション（印刷時非表示） -->
-        <div class="no-print mb-6 border-b border-slate-200">
-            <nav class="flex space-x-2 sm:space-x-4" aria-label="Tabs">
-                <button id="tabBtn1" onclick="switchTab(1)" class="tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors">
-                    <i data-lucide="percent" class="w-4 h-4"></i>
-                    <span>月次データ入力・比率計算</span>
-                </button>
-                <button id="tabBtn2" onclick="switchTab(2)" class="tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                    <span>定義済み数値（基幹数値）設定</span>
-                </button>
-            </nav>
-        </div>
+        
+<!-- タブナビゲーション（印刷時非表示） -->
+<div class="no-print mb-6 border-b border-slate-200">
+    <nav class="app-tabs" aria-label="Tabs">
+        <button id="tabBtn1" onclick="switchTab(1)"
+            class="tab-btn active">
+            <i data-lucide="percent" class="w-4 h-4"></i>
+            <span>月次データ入力・比率計算</span>
+        </button>
+
+        <button id="tabBtn2" onclick="switchTab(2)"
+            class="tab-btn">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span>定義済み数値（基幹数値）設定</span>
+        </button>
+    </nav>
+</div>
 
         <!-- タブ1: 月次データ入力 ＆ 比率計算 -->
         <div id="tabContent1" class="tab-content space-y-6">
@@ -845,26 +685,22 @@ document.getElementById('targetMonth').addEventListener('change', (e) => {
         });
 
         // タブ切り替え
-        function switchTab(tabNum) {
-            const tabBtn1 = document.getElementById('tabBtn1');
-            const tabBtn2 = document.getElementById('tabBtn2');
-            const content1 = document.getElementById('tabContent1');
-            const content2 = document.getElementById('tabContent2');
+        
+function switchTab(tabNum) {
+    const tabBtn1 = document.getElementById('tabBtn1');
+    const tabBtn2 = document.getElementById('tabBtn2');
+    const content1 = document.getElementById('tabContent1');
+    const content2 = document.getElementById('tabContent2');
 
-            if (tabNum === 1) {
-                content1.classList.remove('hidden');
-                content2.classList.add('hidden');
+    const isTab1 = tabNum === 1;
 
-                tabBtn1.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors";
-                tabBtn2.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors";
-            } else {
-                content1.classList.add('hidden');
-                content2.classList.remove('hidden');
+    content1.classList.toggle('hidden', !isTab1);
+    content2.classList.toggle('hidden', isTab1);
 
-                tabBtn2.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-colors";
-                tabBtn1.className = "tab-btn py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition-colors";
-            }
-        }
+    tabBtn1.classList.toggle('active', isTab1);
+    tabBtn2.classList.toggle('active', !isTab1);
+}
+
 
         // 入力変更ハンドラ (月次データ)
         
